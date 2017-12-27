@@ -1,13 +1,11 @@
 var dbug_on = false;
 var insertdate_on = false;
 var genre_and = false;
-var genre = [];
-var genre_strings = [];
 var info = [];
-var maintabhide = false;
-
 
 $(document).ready(function() {
+	var genre = [];
+	var genre_strings = [];
 	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/mythmngBE.php", 

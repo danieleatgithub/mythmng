@@ -4,7 +4,7 @@
 $('.reset').on('click', function() {
   $('#result-'+$(this).data('target')).addClass('hide');
   $('#freetxt').val("");
-  $('#insertdate_limit').val("20");
+  $('#page_limit').val("");
   $('#title_in').val("");
   $('#divmsg').html('');
   $('#divout').html('');
@@ -20,22 +20,22 @@ $('.reset').on('click', function() {
 	if($(value).hasClass("active")) {
 	  $(value).removeClass("active")
 	}	
-	genre = [];	
   });
   
 });
 
-// maintabhide
-$('.maintabhide').on('click', function() {
-  maintabhide = !maintabhide;
-  if(maintabhide == true) {
+// Hide div from target
+$('.divhide').on('click', function() {
+  var hidetab = $('.'+$(this).attr('target'));
+  console.log($(hidetab));
+  if($(hidetab).is(':visible')) {
 	  $('.maintabhide').removeClass("glyphicon-triangle-bottom");
 	  $('.maintabhide').addClass("glyphicon-triangle-top");
-	  $('.maintab').hide();
+	  $(hidetab).hide();
   } else {
 	  $('.maintabhide').removeClass("glyphicon-triangle-top");
 	  $('.maintabhide').addClass("glyphicon-triangle-bottom");
-	  $('.maintab').show();
+	  $(hidetab).show();
   }
 });
 // genre_and toggler
@@ -71,30 +71,27 @@ $('.insertdate').on('click', function() {
 
 // genre toggler
 $('.genre').on('click', function() {
-	var checkbox = $(this);
-	var label = checkbox.parent('label');
-	var id = checkbox.attr('name');
-	var debug = checkbox.attr('name');
-	// Remove element if present
-	var i = genre.indexOf(id);
-	if(i != -1) genre.splice(i, 1);	
-	// Push if activated
-	if(!$(this).hasClass("active")) {
-		debug += " activated"
-		genre.push(id)
+	var id=$(this).attr("name");
+	if($(this).hasClass("active")) {
+	  $(this).addClass("active");
+		console.log(id + " addClass");
+	} else {
+	  $(this).removeClass("active");
+	  console.log(id + " removeClass");		
 	}	
-	console.log(debug + " genre=" + genre);
-
 });
 
 
-
-
-
 $('.view').on('click', function() {
-   var insertdate_limit = $('#insertdate_limit').val();
+   var page_limit 		= $('#page_limit').val();
    var title 			= $('#title_in').val();
    var watched			= $('.watched').val();
+   var genre = [];
+   $.each($('.genre'), function( index, value ) {
+	if($(value).hasClass("active")) {
+		genre.push($(value).attr("name"));
+	}	
+	});
 	$('#divout').html("");
 	$.ajax({ 
 		type: "POST",
@@ -106,7 +103,7 @@ $('.view').on('click', function() {
 				watched: watched,
 				title: title,
 				insertdate_on: insertdate_on,
-				insertdate_limit: insertdate_limit
+				page_limit: page_limit
 				},
 		success: function( response ) {
 			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
@@ -120,7 +117,13 @@ $('.view').on('click', function() {
 					<div class="container-fluid ltab">\
 					');
 				for(var i=0; i<count; i++) {
-					text = buildMovieRecord(parsed[i]);
+					console.log(parsed[i]);
+					cast = [];
+					genre = [];
+					movie=parsed[i]['movie'];
+					cast=parsed[i]['cast'];
+					genre=parsed[i]['genre'];
+					text = buildMovieRecord(movie,cast,genre);
 					$('#divout').append(text);
 				}
 				$('#divout').append('\
@@ -137,63 +140,6 @@ $('.view').on('click', function() {
 
 });
 
-$('.search').on('click', function() {
-  var txt = $('#freetxt').val();
-  var lastupdate_limit = $('#lastupdate_limit').val();
-  var sqlq = "name LIKE '%"+txt+"%' OR description LIKE '%"+txt+"%'";
-	$.ajax({ 
-		type: "POST",
-		url: "/mythuser-0.2/draft/view.php", 
-		dataType: "json", 
-		data: { 
-				sql: sqlq, 
-				mode: 'mode',
-				lastUnit: lastUnit,
-				lastUnit1: lastUnit1,
-				lastBox: null,
-				lastDrawer: null,
-				lastupdate_on: lastupdate_on,
-				lastupdate_limit: lastupdate_limit
-				},
-		success: function( response ) {
-			if(dbug_on) $('#divdeb').html(response.debug);
-			$('#divmsg').html(response.message);
-			$('#divout').html( response.out );
-		}
-    });
-
-});
-
-$('.edit').on('click', function() {
-  var res = $('#builder-'+$(this).data('target')).queryBuilder('getSQL', $(this).data('stmt'));
-  var mode = $('input:radio[name=modo-'+$(this).data('target')+']:checked').val();
-  var lastupdate_limit = $('#lastupdate_limit').val();
-  $('#result-'+$(this).data('target')).removeClass('hide')
-    .find('pre').html(
-      res.sql + (res.params ? '\n\n' + JSON.stringify(res.params, null, 2) : '')
-    );
-	$.ajax({ 
-		type: "POST",
-		url: "/x/draft/edit.php", 
-		dataType: "json", 
-		data: { sql: res.sql, 
-				mode: mode,
-				lastUnit: lastUnit,
-				lastUnit1: lastUnit1,
-				lastBox: null,
-				lastDrawer: null,
-				webcam_on: webcam_on,
-				lastupdate_on: lastupdate_on,
-				lastupdate_limit: lastupdate_limit
-				},
-		success: function( response ) {
-			if(dbug_on) $('#divdeb').html(response.debug);
-			$('#divmsg').html(response.message);
-			$('#divout').html( response.out );
-		}
-    });
-
-});
 
 $('.savequery').on('click', function() {
   var res = $('#builder-'+$(this).data('target')).queryBuilder('getSQL', $(this).data('stmt'));
@@ -239,86 +185,11 @@ $('.customquery').on('click', function() {
     });
 });
 
-$('#newitem').click(function() {
-	$.ajax({ 
-		type: "POST",
-		url: "xeditBE.php", 
-		dataType: "json", 
-		data: { cmd: "newItem" },
-		success: function( response ) {
-			if(response.error) {
-				alert(response.query+"\n"+response.message);
-			} else {
-				sql = "item.ID = "+response.item_id;
-				cats = null;
-				$.ajax({ 
-					type: "POST",
-					url: "/mythuser-0.2/draft/edit.php", 
-					dataType: "html", 
-					data: { 
-							sql: sql, 
-							mode: 1,
-							lastUnit: lastUnit,
-							lastUnit1: lastUnit1,
-							lastBox: lastBox,
-							lastDrawer: lastDrawer,
-							webcam_on: webcam_on
-							},
-					success: function( response ) {
-						$('#divout').html( response );
-					}
-				});
-			}
-		}
-    });
 
-});
 
-$('#backup').on('click', function() {
-	$.ajax({ 
-		type: "POST",
-		url: "/x/draft/editBE.php", 
-		dataType: "json", 
-		data: { 
-			cmd: "backup"
-				},
-		success: function( response ) {
-				if(dbug_on) $('#divdeb').html(response.debug);
-				$('#divmsg').html(response.message);
-		},
-		error: function(  ) {
-			var err = "Connection Error";
-			var eee = "<div class='alert alert-danger  fade in'><a href='#' class='close' data-dismiss='alert'>&times;</a><strong>Error!</strong> "+err+"</div>";
-			$('#divmsg').html(eee);
-			if(dbug_on) $('#divdeb').html(response.debug);
-		},
-		
-    });
-	
-});
 
-$('#backupfull').on('click', function() {
-	$.ajax({ 
-		type: "POST",
-		url: "/x/draft/editBE.php", 
-		dataType: "json", 
-		data: { 
-			cmd: "backup",
-			mode: "full"
-				},
-		success: function( response ) {
-				if(dbug_on) $('#divdeb').html(response.debug);
-				$('#divmsg').html(response.message);
-		},
-		error: function(  ) {
-			var err = getAlert("Connection Error");
-			$('#divmsg').html(err);
-			if(dbug_on) $('#divdeb').html(response.debug);
-		},
-		
-    });
-	
-});
+
+
 
 
 

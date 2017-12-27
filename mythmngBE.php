@@ -57,6 +57,7 @@ if(!$mysqli->query($query)) {
 
 if($_POST['request'] == "get_genre") {
 	$query = "SELECT * FROM videogenre ORDER by genre";
+	$cnt=0;
 	if($res = $mysqli->query($query)) {
 		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
 			$cnt++;
@@ -89,9 +90,11 @@ if($_POST['request'] == "get_info") {
 		$rout['total'] = $row['total'];
 		
 		$genre = array();
+		$cnt=0;
 		$query = "select  count(videometadatagenre.idvideo) as count, videometadatagenre.idgenre, videogenre.genre from videometadatagenre join videogenre on videogenre.intid = videometadatagenre.idgenre  group by videometadatagenre.idgenre order by videometadatagenre.idgenre;";
 		if($res = $mysqli->query($query)) {
 			while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+				$cnt++;
 				array_push($genre,$row);
 			}
 			$rout['genre'] = $genre;

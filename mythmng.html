@@ -6,9 +6,9 @@
 </head>
 <title>MythManager</title>
 <body style="margin-bottom: 0px; margin-top: 0px;">
-<span class="glyphicon glyphicon-triangle-bottom maintabhide" aria-hidden="true" ></span>
+<span class="glyphicon glyphicon-triangle-bottom divhide" target="maintab"  aria-hidden="true" ></span>
 
-<div class="container-fluid maintab">
+<div class="container-fluid maintab" >
 	<div class="row">
 		<div class="col-md-12"><center><h2>MythManager</h2></center></div>
 	</div>
@@ -19,7 +19,6 @@
 				<ul class="nav nav-tabs" role="tablist">
 					<li role="presentation" class="mythtab active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">MythManager</a></li>
 					<li role="presentation" class="mythtab "><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Ricerca</a></li>
-					<li role="presentation" class="mythtab "><a href="#custom" aria-controls="custom" role="tab" data-toggle="tab">Ricerche speciali</a></li>
 					<li role="presentation" class="mythtab "><a href="#test" aria-controls="test" role="tab" data-toggle="tab">Manutenzione</a></li>
 				</ul>
 
@@ -37,44 +36,64 @@
 					<!-- Tab search -->
 					<div role="tabpanel" class="tab-pane" id="search">
 						<!-- Genre buttons -->
-						<div class="row">
-							<div class="col-md-12">
-								<div id="divgenre" class="btn-group" data-toggle="buttons" btn-block></div>
-							</div>
+						<div class='row'>
+							<span class="glyphicon glyphicon-triangle-bottom divhide" target="searchgdiv" aria-hidden="true" ></span>
 						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<center>
-								<div id="divgenretag" class="btn-group" data-toggle="buttons" btn-block></div>
-								</center>
-							</div>
+						<div class='searchgdiv'>						
+							<div class='row'>
+								<div class="row">
+									<div class="col-md-12">
+										<div id="divgenre" class="btn-group searchbtn" data-toggle="buttons" btn-block></div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<center>
+										<div id="divgenretag" class="btn-group searchbtn" data-toggle="buttons" btn-block></div>
+										</center>
+									</div>
+								</div>						
+								<div class="row">
+									<div class='btn-group searchbtn'>
+										<div class="col-md-12">
+											<button class='btn btn-warning genre_and' >OR mode</button>
+											<select class='btn btn-warning selectpicker watched'>
+												<option value="0">Tutti</option>
+												<option value="1">Da vedere</option>
+												<option value="2">Visti</option>
+											</select>
+											<button class='btn btn-warning title' >Titolo</button>
+											<input id='title_in' width='60' value=''></input>
+										</div>
+									</div>
+								</div>						
+							</div>						
 						</div>						
-						<!-- Genre buttons -->
-						<br>
-						<div class='btn-group'>
-							<button class='btn btn-warning insertdate' data-target='xxx' >Ultimi inseriti OFF</button>
-							<input id='insertdate_limit' width='10' value='20'></input>
+						<!-- Text and other buttons -->
+						<div class='row'>
+							<span class="glyphicon glyphicon-triangle-bottom divhide" target="orderdiv" aria-hidden="true" ></span>
 						</div>
-						<div class='btn-group'>
-							<button class='btn btn-warning genre_and' data-target='xxx' >OR mode</button>
+						<div class='orderdiv'>						
+							<div class='row'>
+								<div class='btn-group searchbtn'>
+									<div class="col-md-12">
+										<button class='btn btn-warning insertdate' >Ultimi inseriti OFF</button>
+										Per pagina<input id='page_limit' width='10' value=''></input>
+									</div>
+								</div>
+							</div>						
 						</div>
-						<div class='btn-group'>
-							<button class='btn btn-warning title' data-target='xxx' >Titolo</button>
-							<input id='title_in' width='40' value=''></input>
+						<div class='row'>
+							<span class="glyphicon glyphicon-triangle-bottom divhide" target="commanddiv" aria-hidden="true" ></span>
 						</div>
-						<select class='btn btn-warning selectpicker watched'>
-						  <option value="0">Tutti</option>
-						  <option value="1">Da vedere</option>
-						  <option value="2">Visti</option>
-						</select>
-						<br>
-						<div class='btn-group'>
-							<button class='btn btn-info reset' data-target='xxx'>Reset</button>
-							<button class='btn btn-primary dbug' data-target='xxx'>Debug OFF</button>
-							<button class='btn btn-success view' data-target='xxx' data-stmt='false'>Visualizza</button>
-							<button class='btn btn-success edit' data-target='xxx' data-stmt='false'>Edit</button>	  
-							<button id='backup' class='btn btn-warning' data-target='xxx' data-stmt='false'>Backup</button>
-							<button id='backupfull' class='btn btn-warning' data-target='xxx' data-stmt='false'>Full Backup</button>
+						<div class='commanddiv'>						
+							<div class='row'>
+								<div class='btn-group'>
+									<button class='btn btn-info reset'>Reset</button>
+									<button class='btn btn-primary dbug'>Debug OFF</button>
+									<button class='btn btn-success view'>Visualizza</button>
+								</div>
+							</div>						
 						</div>
 					</div>
 					<!-- Tab custom -->

@@ -55,13 +55,19 @@ body{
 	padding:5px
 }
 
-
 .row.row-align-bottom > div {
     float: none;
     display: inline-block;
     vertical-align: bottom;
     margin-right: -0.25em;
 }
+
+
+.searchbtn {
+	margin-top: 10px; 
+}
+
+
 
 .col-xs-05, .col-xs-115, .col-xs-1 {
     float: left;
