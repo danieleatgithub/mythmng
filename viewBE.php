@@ -1,5 +1,16 @@
 <?php
-require_once(dirname(__FILE__) . "/globals.php"); 
+require_once(dirname(__FILE__) . "/messages_it.php");
+if(!file_exists(dirname(__FILE__) . "/globals.php")) {
+	$response_array['error']=true;
+	$response_array['count'] = 0;
+	$response_array['out'] = $msg['globals_2'];
+	$response_array['debug']= __FILE__;							
+	$response_array['message'] = $msg['globals_1'];	
+	header('Content-type: application/json');
+	echo json_encode($response_array);		
+	exit(); 			
+}
+require_once(dirname(__FILE__) . "/globals.php");
 
 define('THUMBNAIL_IMAGE_MAX_WIDTH', 100);
 define('THUMBNAIL_IMAGE_MAX_HEIGHT', 150);
@@ -48,8 +59,8 @@ $insertdate_limit = 20;
 $title = "";
 
 if(isset($_POST['insertdate_on'])) {
-	$lastupdate_limit = intval($_POST['insertdate_limit']);
-	if($_POST['insertdate_on'] == 'true') {
+	$insertdate_limit = intval($_POST['insertdate_limit']);
+	if($_POST['insertdate_on'] == true) {
 		$insertdate_on = true;
 		$order = " ORDER BY videometadata.insertdate DESC limit ". $insertdate_limit . " ";
 	}
@@ -93,7 +104,7 @@ if(!isset($_POST['genre'])) {
 		array_push($conditions,$c);
 	}
 	if(strlen($title)) array_push($conditions," videometadata.title LIKE '%".$title."%' ");
-
+	
 	if(empty($conditions) > 0) {
 		$s = " WHERE ";
 		foreach($conditions as $k) {
@@ -103,7 +114,7 @@ if(!isset($_POST['genre'])) {
 	}
 	$query = "SELECT DISTINCT videometadata.* FROM ".
 		"videometadata ".
-		$where;
+		$where .
 		$order;
 }
 

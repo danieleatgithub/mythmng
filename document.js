@@ -19,6 +19,12 @@ $(document).ready(function() {
 			var count  = response.count;
 			var text = "";
 			var type = "btn-primary";
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				disableAllTabs();				
+				return;
+			}			
 			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
 			genre_strings = JSON.parse(response.out);
 			for(var i=0; i<count; i++) {
@@ -31,7 +37,7 @@ $(document).ready(function() {
 				text += '<input type="checkbox" autocomplete="off">'  + genre_strings[i]['genre'] +'</label>';
 				div.append(text);
 			}
-			
+
 		},
 		error: function( request, error ) {
 			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
@@ -49,9 +55,16 @@ $(document).ready(function() {
 			var ctx = document.getElementById("myChart");
 			var count  = response.count;
 			var text = "";
+
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));			
+				return;
+			}			
+
 			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
 			info = JSON.parse(response.out);
-			$('#homeout').append("Totale video: "+info['total']);
+			$('#homeleft').append("Totale video: "+info['total']);
 			var colors = palette('rainbow', info['genre'].length);
 			var data_set 	= [];
 			var data_labels = [];
@@ -84,13 +97,13 @@ $(document).ready(function() {
 					}
 				}
 			});
-			
-			
 		},
 		error: function( request, error ) {
 			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
 			$('#divmsg').html(getAlert(error));			
 		}
     });
-	$.getScript("/mythmng/videoedit2.js");
+	
+	// FIXME: wait promise
+	$.getScript("/mythmng/mythmng.js");
  }); 

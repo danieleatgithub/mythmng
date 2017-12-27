@@ -1,5 +1,16 @@
 <?php
-require_once(dirname(__FILE__) . "/globals.php"); 
+require_once(dirname(__FILE__) . "/messages_it.php");
+if(!file_exists(dirname(__FILE__) . "/globals.php")) {
+	$response_array['error']=true;
+	$response_array['count'] = 0;
+	$response_array['out'] = $msg['globals_2'];
+	$response_array['debug']= __FILE__;							
+	$response_array['message'] = $msg['globals_1'];	
+	header('Content-type: application/json');
+	echo json_encode($response_array);		
+	exit(); 			
+}
+require_once(dirname(__FILE__) . "/globals.php");
 
 $out = "";
 $error = "";
