@@ -1,4 +1,5 @@
 <?php
+require_once(dirname(__FILE__) . "/globals.php"); 
 
 define('THUMBNAIL_IMAGE_MAX_WIDTH', 100);
 define('THUMBNAIL_IMAGE_MAX_HEIGHT', 150);
@@ -8,11 +9,8 @@ $error = "";
 $debug = "";
 
 
-
-
-
 /* check connection */
-$mysqli = new mysqli("localhost", "root", "a", "mythconverg");
+$mysqli = new mysqli($_db['ip'], $_db['user'], $_db['password'], "mythconverg");
 if ($mysqli->connect_errno) { 
 	$response_array['error']=true;
 	$response_array['count'] = 0;

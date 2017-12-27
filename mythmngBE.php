@@ -1,4 +1,5 @@
 <?php
+require_once(dirname(__FILE__) . "/globals.php"); 
 
 $out = "";
 $error = "";
@@ -18,7 +19,7 @@ if(!isset($_POST['request'])) {
 	exit(); 	
 }
 
-$mysqli = new mysqli("localhost", "root", "a", "mythconverg");
+$mysqli = new mysqli($_db['ip'], $_db['user'], $_db['password'], "mythconverg");
 if ($mysqli->connect_errno) { 
 	$response_array['error']=true;
 	$response_array['count'] = 0;
