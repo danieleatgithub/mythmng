@@ -115,10 +115,16 @@ $('.view').on('click', function() {
 				var parsed = JSON.parse(response.out);
 				var count  = response.count;
 				var text = "";
+				// Build record
+				$('#divout').append('\
+					<div class="container-fluid ltab">\
+					');
 				for(var i=0; i<count; i++) {
-					text += parsed[i]['title'];
+					text = buildMovieRecord(parsed[i]);
+					$('#divout').append(text);
 				}
-				$('#divout').html( text);
+				$('#divout').append('\
+					</div>');
 			} else {
 				$('#divmsg').html(getAlert(response.message));
 			}			

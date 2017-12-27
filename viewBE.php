@@ -60,7 +60,7 @@ $title = "";
 
 if(isset($_POST['insertdate_on'])) {
 	$insertdate_limit = intval($_POST['insertdate_limit']);
-	if($_POST['insertdate_on'] == true) {
+	if($_POST['insertdate_on'] == 'true') {
 		$insertdate_on = true;
 		$order = " ORDER BY videometadata.insertdate DESC limit ". $insertdate_limit . " ";
 	}
