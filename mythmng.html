@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="en">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<head><meta charset="utf-8">
-</head>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
 <title>MythManager</title>
+<script src="/mythmng/utilities.js"></script>	
+
+</head>
 <body style="margin-bottom: 0px; margin-top: 0px;">
 <span class="glyphicon glyphicon-triangle-bottom divhide" target="maintab"  aria-hidden="true" ></span>
 
@@ -17,9 +18,21 @@
 		<!-- Nav tabs -->
 			<div class="card">
 				<ul class="nav nav-tabs" role="tablist">
-					<li role="presentation" class="mythtab active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">MythManager</a></li>
-					<li role="presentation" class="mythtab "><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Ricerca</a></li>
-					<li role="presentation" class="mythtab "><a href="#test" aria-controls="test" role="tab" data-toggle="tab">Manutenzione</a></li>
+					<li role="presentation" class="mythtab active">
+						<a href="#home" aria-controls="home" role="tab" data-toggle="tab">MythManager</a>
+					</li>
+					<li role="presentation" class="mythtab ">
+						<a href="#search" aria-controls="search" role="tab" data-toggle="tab">Ricerca Video</a>
+					</li>
+					<li role="presentation" class="mythtab ">
+						<a href="#recordered" aria-controls="recordered" role="tab" data-toggle="tab">Registrazioni</a>
+					</li>
+					<li role="presentation" class="mythtab ">
+						<a href="#usb" aria-controls="usb" role="tab" data-toggle="tab">USB</a>
+					</li>
+					<li role="presentation" class="mythtab ">
+						<a href="#test" aria-controls="test" role="tab" data-toggle="tab">Manutenzione</a>
+					</li>
 				</ul>
 
 				<!-- Tab panes -->
@@ -43,18 +56,18 @@
 							<div class='row'>
 								<div class="row">
 									<div class="col-md-12">
-										<div id="divgenre" class="btn-group searchbtn" data-toggle="buttons" btn-block></div>
+										<div id="divgenre" class="btn-group paddedbtn" data-toggle="buttons" btn-block></div>
 									</div>
 								</div>
 								<div class="row">
 									<div class="col-md-12">
 										<center>
-										<div id="divgenretag" class="btn-group searchbtn" data-toggle="buttons" btn-block></div>
+										<div id="divgenretag" class="btn-group paddedbtn" data-toggle="buttons" btn-block></div>
 										</center>
 									</div>
 								</div>						
 								<div class="row">
-									<div class='btn-group searchbtn'>
+									<div class='btn-group paddedbtn'>
 										<div class="col-md-12">
 											<button class='btn btn-warning genre_and' >OR mode</button>
 											<select class='btn btn-warning selectpicker watched'>
@@ -75,7 +88,7 @@
 						</div>
 						<div class='orderdiv'>						
 							<div class='row'>
-								<div class='btn-group searchbtn'>
+								<div class='btn-group paddedbtn'>
 									<div class="col-md-12">
 										<button class='btn btn-warning insertdate' >Ultimi inseriti OFF</button>
 										Per pagina<input id='page_limit' width='10' value=''></input>
@@ -88,19 +101,62 @@
 						</div>
 						<div class='commanddiv'>						
 							<div class='row'>
-								<div class='btn-group'>
-									<button class='btn btn-info reset'>Reset</button>
-									<button class='btn btn-primary dbug'>Debug OFF</button>
-									<button class='btn btn-success view'>Visualizza</button>
+								<div class='btn-group paddedbtn'>
+									<button class='btn btn-info 	onbarbtn reset'>Reset</button>
+									<button id="xx" class='btn btn-primary 	onbarbtn dbug'>Debug OFF</button>
+									<button class='btn btn-success 	onbarbtn view'>Visualizza</button>
 								</div>
 							</div>						
 						</div>
 					</div>
 					<!-- Tab custom -->
-					<div role="tabpanel" class="tab-pane" id="custom">
+					<div role="tabpanel" class="tab-pane" id="usb">
+						<div class='row'>
+							<button class='btn btn-warning ' >USB path</button>
+							<input id='usbpath' width='80' value=''></input>
+						</div>												
+						<div class='commanddiv'>						
+							<div class='row'>
+								<div class="col-md-12">
+									<div class='btn-group paddedbtn'>
+										<button class='btn btn-primary onbarbtn dbug'>Debug OFF</button>
+										<button class='btn btn-success onbarbtn ckspace'>Controlla spazio</button>
+										<button class='btn btn-success onbarbtn cresh'>Crea script</button>
+									</div>
+								</div>
+							</div>						
+						</div>
 					</div>
 					<!-- Tab test -->
 					<div role="tabpanel" class="tab-pane" id="test">
+						<div class='row'>
+							<div class='commanddiv'>						
+								<div class='row'>
+									<div class="col-md-12">
+										<div class='btn-group paddedbtn'>
+											<button class='btn btn-primary onbarbtn dbug'>Debug OFF</button>
+											<button class='btn btn-success onbarbtn checkdb'>Controlla congruenza DB</button>
+											<button class='btn btn-success onbarbtn checkpic'>Controlla immagini orfane</button>
+										</div>
+									</div>
+								</div>						
+							</div>
+						</div>
+					</div>
+					<!-- Tab xxxx -->
+					<div role="tabpanel" class="tab-pane" id="recordered">
+						<div class='row'>
+							<div class='commanddiv'>						
+								<div class='row'>
+									<div class="col-md-12">
+										<div class='btn-group paddedbtn'>
+											<button class='btn btn-primary onbarbtn dbug'>Debug OFF</button>
+											<button class='btn btn-success onbarbtn Refresh'>Aggiorna</button>
+										</div>
+									</div>
+								</div>						
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -120,24 +176,45 @@
 		</div>
 	</div>
 </div>	
-<link rel="stylesheet" type="text/css" href="/mythmng/navpanel.css" rel="stylesheet">
 
+<!-- movie view template -->
+<div class="row vmovie" id="movietemplate" style="display:none;">
+	<div class="col-xs-2 col-md-1">
+		<a href="#" class="thumbnail">
+			<img id="idcover" class="thumberror" src="" alt="No image">
+		</a>
+	</div>
+	<div class="col-xs-05">
+		<div class="row"  >
+			<span id="idzoom" class="glyphicon glyphicon glyphicon-zoom-in moviezoom" index="movieid" aria-hidden="true" />
+		</div>
+		<div class="row"  >
+			<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit" index="movieid" aria-hidden="true" />
+		</div>
+		<div class="row"  >
+			<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" index="movieid" aria-hidden="true" />
+		</div>
+	</div>
+	<div class="col-xs-115">
+		<div id="idmovietext"></div>
+	</div>
+</div>
+<!----------------------------->
+
+
+
+<link rel="stylesheet" type="text/css" href="/mythmng/navpanel.css" rel="stylesheet">
 <script src="/js/jquery-1.11.1.js"></script>
 <script src="/jquery-ui-1.11.1.custom/jquery-ui.js"></script>
 <link rel="stylesheet" type="text/css" href="/jquery-ui-1.11.1.custom/jquery-ui.css" rel="stylesheet">
-
 <link rel="stylesheet" type="text/css" href="/bootstrap-3.3.2-dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="/bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
-
 <link rel="stylesheet" type="text/css" href="/jquery-ui-multiselect-widget-master/jquery.multiselect.css" />
 <link rel="stylesheet" type="text/css" href="/jquery-ui-multiselect-widget-master/jquery.multiselect.filter.css" />
 <script type="text/javascript" src="/jquery-ui-multiselect-widget-master/src/jquery.multiselect.js"></script>
 <script type="text/javascript" src="/jquery-ui-multiselect-widget-master/src/jquery.multiselect.filter.js"></script>
-
-
 <script type="text/javascript" src="/mythmng/charts/palette.js"></script>
 <script type="text/javascript" src="/mythmng/charts/Chart.js"></script>
-<script src="/mythmng/utilities.js"></script>	
 <script src="/mythmng/document.js"></script>	
 
 </body></html>

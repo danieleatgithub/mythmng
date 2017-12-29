@@ -63,10 +63,12 @@ body{
 }
 
 
-.searchbtn {
+.paddedbtn {
 	margin-top: 10px; 
 }
-
+.onbarbtn {
+	margin-right: 3px; 
+}
 
 
 .col-xs-05, .col-xs-115, .col-xs-1 {

@@ -1,7 +1,8 @@
-var dbug_on = false;
-var insertdate_on = false;
-var genre_and = false;
-var info = [];
+var debug 			= false;
+var insertdate_on 	= false;
+var genre_and 		= false;
+var info 	= [];
+var records = [];
 
 $(document).ready(function() {
 	var genre = [];
@@ -23,7 +24,7 @@ $(document).ready(function() {
 				disableAllTabs();				
 				return;
 			}			
-			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
+			if(debug) $('#divdeb').html(getInfo(response.debug));
 			genre_strings = JSON.parse(response.out);
 			for(var i=0; i<count; i++) {
 				var div=$('#divgenre');
@@ -38,7 +39,7 @@ $(document).ready(function() {
 
 		},
 		error: function( request, error ) {
-			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
+			if(debug) $('#divdeb').html(getInfo(response.debug));
 			$('#divmsg').html(getAlert(error));			
 		}
     });
@@ -60,7 +61,7 @@ $(document).ready(function() {
 				return;
 			}			
 
-			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
+			if(debug) $('#divdeb').html(getInfo(response.debug));
 			info = JSON.parse(response.out);
 			$('#homeleft').append("Totale video: "+info['total']);
 			var colors = palette('rainbow', info['genre'].length);
@@ -84,7 +85,7 @@ $(document).ready(function() {
 					backgroundColor: data_colors
 				}]
 				};
-			console.log(data);
+			//console.log(data);
 			var myPieChart = new Chart(ctx,{
 				type: 'pie',
 				data: data,
@@ -97,11 +98,11 @@ $(document).ready(function() {
 			});
 		},
 		error: function( request, error ) {
-			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
+			if(debug) $('#divdeb').html(getInfo(response.debug));
 			$('#divmsg').html(getAlert(error));			
 		}
     });
-	
+
 	// FIXME: wait promise
 	$.getScript("/mythmng/mythmng.js");
  }); 

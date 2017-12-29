@@ -67,7 +67,7 @@ if(isset($_POST['page_limit'])) {
 }
 
 if($insertdate_on)  $order = " ORDER BY videometadata.insertdate DESC limit ". $page_limit . " ";
-else 				$order = " ORDER BY videometadata.title DESC limit ". $page_limit . " ";
+else 				$order = " ORDER BY videometadata.title ASC limit ". $page_limit . " ";
 
 if(isset($_POST['title'])) $title = $_POST['title'];
 
@@ -106,7 +106,8 @@ if(!isset($_POST['genre'])) {
 		if($_POST['watched'] == "2") array_push($conditions," videometadata.watched = TRUE ");
 	}
 	if(strlen($title)) array_push($conditions," videometadata.title LIKE '%".$title."%' ");	
-	if(empty($conditions) > 0) {
+	trigger_error (print_r($conditions,true),E_USER_NOTICE);
+	if(!empty($conditions)) {
 		$s = " WHERE ";
 		foreach($conditions as $k) {
 			$where .= $s . $k;
@@ -129,7 +130,7 @@ $movie = array();
 
 if($res = $mysqli->query($query)) {
 	while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-		$cnt++;
+		//trigger_error ($row['plot'],E_USER_NOTICE);
 		$row['title'] 		= htmlentities(utf8_encode($row['title']), 0, "UTF-8");
 		$row['plot']  		= htmlentities(utf8_encode(trim($row['plot'])), 0, "UTF-8");
 		$row['director']  	= htmlentities(utf8_encode($row['director']), 0, "UTF-8");
@@ -137,6 +138,7 @@ if($res = $mysqli->query($query)) {
 		$row['tagline']  	= htmlentities(utf8_encode($row['tagline']), 0, "UTF-8");
 		$row['studio']  	= htmlentities(utf8_encode($row['studio']), 0, "UTF-8");
 		array_push($movie,$row);
+		//trigger_error ($row['plot'],E_USER_NOTICE);
 	}
 	foreach($movie as $m) {
 		$cast = array();
@@ -164,8 +166,9 @@ if($res = $mysqli->query($query)) {
 		$video['movie']=$m;
 		$video['cast']=$cast;
 		$video['genre']=$genre;
-		
 		array_push($rout,$video);
+		$cnt++;
+
 	}
 	
 	$response_array['error']=false;

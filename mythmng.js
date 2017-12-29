@@ -9,9 +9,9 @@ $('.reset').on('click', function() {
   $('#divmsg').html('');
   $('#divout').html('');
   $('#divdeb').html('');
-  dbug_on = false;
+  debug 		= false;
   insertdate_on = false;
-  genre_and = false;
+  genre_and 	= false;
   $('.genre_and').html('OR mode');
   $('.dbug').html('Debug OFF');
   $('.insertdate').html('Ultimi inseriti OFF');
@@ -21,13 +21,12 @@ $('.reset').on('click', function() {
 	  $(value).removeClass("active")
 	}	
   });
-  
+  records = [];
 });
 
 // Hide div from target
 $('.divhide').on('click', function() {
   var hidetab = $('.'+$(this).attr('target'));
-  console.log($(hidetab));
   if($(hidetab).is(':visible')) {
 	  $('.maintabhide').removeClass("glyphicon-triangle-bottom");
 	  $('.maintabhide').addClass("glyphicon-triangle-top");
@@ -38,6 +37,50 @@ $('.divhide').on('click', function() {
 	  $(hidetab).show();
   }
 });
+
+// view movie detail
+$('.moviezoom').on('click', function() {
+  var target = $('.'+$(this).attr('target'));
+  console.log("zoom");
+  console.log($(target));
+ });
+
+// open editable div
+$('.movieedit').on('click', function() {
+  var target = $('.'+$(this).attr('target'));
+  console.log("edit");
+  console.log($(target));
+ });
+
+ // play movie on frontend
+$('.movieplay').on('click', function() {
+  var index = $(this).attr('index');
+ 	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/mythmngBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "video_play",
+				intid: records[index]['movie']['intid']
+				},
+		success: function( response ) {
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));			
+				return;
+			}			
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			var result = JSON.parse(response.out);
+			console.log(result);
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		},
+	});
+ });
+ 
+ 
 // genre_and toggler
 $('.genre_and').on('click', function() {
   genre_and = !genre_and;
@@ -50,9 +93,9 @@ $('.genre_and').on('click', function() {
 
 // debug toggler
 $('.dbug').on('click', function() {
-  dbug_on = !dbug_on;
+  debug = !debug;
   $('#divdeb').html('');
-  if(dbug_on == true) {
+  if(debug == true) {
 	$('.dbug').html('Debug ON');
   } else {
 	$('.dbug').html('Debug OFF'); 
@@ -74,13 +117,16 @@ $('.genre').on('click', function() {
 	var id=$(this).attr("name");
 	if($(this).hasClass("active")) {
 	  $(this).addClass("active");
-		console.log(id + " addClass");
 	} else {
 	  $(this).removeClass("active");
-	  console.log(id + " removeClass");		
 	}	
 });
 
+
+$('.thumberror').error(function(){
+	$(this).attr('src', '/mythmng/nopic.png');
+	$(this).off("error");
+}).attr('src', '/mythmng/nopic.png');
 
 $('.view').on('click', function() {
    var page_limit 		= $('#page_limit').val();
@@ -106,25 +152,23 @@ $('.view').on('click', function() {
 				page_limit: page_limit
 				},
 		success: function( response ) {
-			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
+			if(debug) $('#divdeb').html(getInfo(response.debug));
 			if(!response.error) {
 				$('#divmsg').html(getSuccess(response.message));
-				var parsed = JSON.parse(response.out);
+				records = JSON.parse(response.out);
 				var count  = response.count;
-				var text = "";
+				
 				// Build record
 				$('#divout').append('\
 					<div class="container-fluid ltab">\
 					');
-				for(var i=0; i<count; i++) {
-					console.log(parsed[i]);
-					cast = [];
-					genre = [];
-					movie=parsed[i]['movie'];
-					cast=parsed[i]['cast'];
-					genre=parsed[i]['genre'];
-					text = buildMovieRecord(movie,cast,genre);
-					$('#divout').append(text);
+				for(var i=0; i<records.length; i++) {
+					//console.log(records[i]);
+					movie=records[i]['movie'];
+					cast=records[i]['cast'];
+					genre=records[i]['genre'];
+					var obj = buildViewMovieRecord(i,movie,cast,genre);
+					$('#divout').append(obj);
 				}
 				$('#divout').append('\
 					</div>');
@@ -133,12 +177,13 @@ $('.view').on('click', function() {
 			}			
 		},
 		error: function( request, error ) {
-			if(dbug_on) $('#divdeb').html(getInfo(response.debug));
+			if(debug) $('#divdeb').html(getInfo(response.debug));
 			$('#divmsg').html(getAlert(error));			
 		}
     });
 
 });
+
 
 
 $('.savequery').on('click', function() {
