@@ -7,7 +7,7 @@ $('.reset').on('click', function() {
   $('#page_limit').val("");
   $('#title_in').val("");
   $('#divmsg').html('');
-  $('#divout').html('');
+  $('#divout').empty();
   $('#divdeb').html('');
   debug 		= false;
   insertdate_on = false;
@@ -22,6 +22,8 @@ $('.reset').on('click', function() {
 	}	
   });
   records = [];
+  oldrecord = [];
+ 
 });
 
 // Hide div from target
@@ -40,21 +42,69 @@ $('.divhide').on('click', function() {
 
 // view movie detail
 $('.moviezoom').on('click', function() {
-  var target = $('.'+$(this).attr('target'));
-  console.log("zoom");
-  console.log($(target));
+	var idicons=$(this).parent().parent();
+	var movieview=idicons.parent().parent();
+	var index = movieview.attr('index');
+	console.log("moviezoom");
+	console.log(idicons);
+	console.log(movieview);
+	console.log(index);
  });
-
+ 
+// editabort 
+$('.editabort').on('click', function() {
+	var idicons=$(this).parent().parent();
+	var movieedit	= idicons.parent().parent();
+	var movieview	= movieedit.parent().parent().parent();
+	var index		= movieedit.attr('index');
+	console.log("editabort");
+	console.log(idicons);
+	console.log(movieedit);
+	console.log(movieview);
+	console.log(index);
+	oldrecord=records[index];
+	movieview.find('#rowview').show();
+	movieview.find('#idextend').empty();
+ });
+ // editok 
+$('.editok').on('click', function() {
+	var idicons=$(this).parent().parent();
+	var movieedit	= idicons.parent().parent();
+	var movieview	= movieedit.parent().parent().parent();
+	var index		= movieedit.attr('index');
+	console.log("editok");
+	console.log(idicons);
+	console.log(movieedit);
+	console.log(movieview);
+	console.log(index);
+	// movieview.find('#rowview').show();
+	// movieview.find('#idextend').empty();
+ });
 // open editable div
-$('.movieedit').on('click', function() {
-  var target = $('.'+$(this).attr('target'));
-  console.log("edit");
-  console.log($(target));
+$('.movieedit').on('click', function() { 
+	var idicons=$(this).parent().parent();
+	var movieview=idicons.parent().parent();
+	var index = movieview.attr('index');
+	console.log("movieedit "+index);
+	console.log(idicons);
+	console.log(movieview);
+	console.log(records[index]['movie']);
+	var movie = records[index]['movie'];
+	var cast  = records[index]['cast'];
+	var genre = records[index]['genre'];
+	var obj = buildEditMovieRecord(index,movie,cast,genre);
+	console.log(obj);
+	oldrecord=records[index];
+	//movieview.find('#rowview').hide();
+	movieview.find('#idextend').append(obj);
+	
  });
 
  // play movie on frontend
 $('.movieplay').on('click', function() {
-  var index = $(this).attr('index');
+ 	var idicons=$(this).parent().parent();
+	var movieview=idicons.parent().parent();
+	var index = movieview.attr('index');
  	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/mythmngBE.php", 
@@ -126,6 +176,7 @@ $('.genre').on('click', function() {
 $('.thumberror').error(function(){
 	$(this).attr('src', '/mythmng/nopic.png');
 	$(this).off("error");
+	console.log("thumberror");
 }).attr('src', '/mythmng/nopic.png');
 
 $('.view').on('click', function() {
@@ -138,7 +189,7 @@ $('.view').on('click', function() {
 		genre.push($(value).attr("name"));
 	}	
 	});
-	$('#divout').html("");
+	$('#divout').empty();
 	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/viewBE.php", 
@@ -157,13 +208,13 @@ $('.view').on('click', function() {
 				$('#divmsg').html(getSuccess(response.message));
 				records = JSON.parse(response.out);
 				var count  = response.count;
-				
+					
 				// Build record
 				$('#divout').append('\
 					<div class="container-fluid ltab">\
 					');
 				for(var i=0; i<records.length; i++) {
-					//console.log(records[i]);
+					console.log(i);
 					movie=records[i]['movie'];
 					cast=records[i]['cast'];
 					genre=records[i]['genre'];
@@ -172,6 +223,7 @@ $('.view').on('click', function() {
 				}
 				$('#divout').append('\
 					</div>');
+					console.log("show2");
 			} else {
 				$('#divmsg').html(getAlert(response.message));
 			}			

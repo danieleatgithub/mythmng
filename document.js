@@ -3,6 +3,7 @@ var insertdate_on 	= false;
 var genre_and 		= false;
 var info 	= [];
 var records = [];
+var oldrecord = [];
 
 $(document).ready(function() {
 	var genre = [];

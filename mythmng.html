@@ -178,29 +178,76 @@
 </div>	
 
 <!-- movie view template -->
-<div class="row vmovie" id="movietemplate" style="display:none;">
-	<div class="col-xs-2 col-md-1">
-		<a href="#" class="thumbnail">
-			<img id="idcover" class="thumberror" src="" alt="No image">
-		</a>
+<div id="movieview-t" class="d-flex p-2" style="display:none;" index="movieid">
+	<div class="row" id="rowview">
+		<div class="col-xs-2 col-md-1">
+			<a href="#" class="thumbnail">
+				<img id="idcover" class="thumberror" src="" alt="No image">
+			</a>
+		</div>
+		<div id="idicons" class="col-xs-05">
+			<div class="row">
+				<span id="idzoom" class="glyphicon glyphicon glyphicon-zoom-in moviezoom" aria-hidden="true" />
+			</div>
+			<div class="row">
+				<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit"  aria-hidden="true" />
+			</div>
+			<div class="row">
+				<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" " aria-hidden="true" />
+			</div>
+		</div>
+		<div class="col-xs-15">
+			<div class="row" >
+				<div id="idtitle" class="movie-title"></div>
+				<div/>
+				<span class="movie-label">Regia:</span><div id="iddirector" class="movie-text"></div>
+				<span class="movie-label">Anno:</span><div id="idyear" class="movie-text"></div>
+				<div/><span class="movie-label">Cast:</span><div id="idcast" class="movie-text"></div>
+				<div/><span class="movie-label">Genere:</span><div id="idgenre" class="movie-text"></div>
+				<div/><div id="iddebug" class="movie-text"></div>
+			</div>
+			<div class="row" >
+				<div id="idplot" class="movie-plot"></div>
+			</div>
+		</div>
 	</div>
-	<div class="col-xs-05">
-		<div class="row"  >
-			<span id="idzoom" class="glyphicon glyphicon glyphicon-zoom-in moviezoom" index="movieid" aria-hidden="true" />
-		</div>
-		<div class="row"  >
-			<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit" index="movieid" aria-hidden="true" />
-		</div>
-		<div class="row"  >
-			<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" index="movieid" aria-hidden="true" />
-		</div>
-	</div>
-	<div class="col-xs-115">
-		<div id="idmovietext"></div>
+	<div class="row" >
+			<div id="idextend"></div>
 	</div>
 </div>
-<!----------------------------->
 
+<!-- edit template -->
+<div id="movieedit-t" style="background-color: PaleGoldenRod;  display:none;" index="movieid">
+	<div class="row" >
+		<div class="col-xs-2 col-md-1">
+			<a href="#" class="thumbnail">
+				<img id="idcover" class="thumberror" src="" alt="No image">
+			</a>
+		</div>
+		<div id="idediticons" class="col-xs-05">
+			<div class="row">
+				<span id="ideditok" class="glyphicon glyphicon-ok editok" aria-hidden="true" />
+			</div>
+			<div class="row">
+				<span id="ideditabort" class="glyphicon glyphicon-remove editabort" aria-hidden="true" />
+			</div>
+		</div>
+		<div class="col-xs-115">
+			<div class="row" >
+				<div class="col-xs-4"><input id='idtitle' class="form-control input-sm"/></div>
+				<div/>
+				<span class="movie-label">Regia:<div class="col-xs-2"><input id='iddirector' class="form-control input-xs"/></div></span>
+				<span class="movie-label">Anno:<div class="col-xs-2"><input id='idyear' class="form-control input-xs"/></div></span> 
+				<div/><span class="movie-label">Cast:</span><div id="idcast" class="movie-text"></div>
+				<div/><span class="movie-label">Genere:</span><div id="idgenre" class="movie-text"></div>
+				<div/><div id="iddebug" class="movie-text"></div>
+			</div>
+			<div class="row" >
+				<textarea id="idplot" class="form-control" style="resize:vertical;"></textarea>'
+			</div>
+		</div>
+	</div>
+</div>
 
 
 <link rel="stylesheet" type="text/css" href="/mythmng/navpanel.css" rel="stylesheet">

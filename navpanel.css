@@ -52,7 +52,7 @@
 }
 body{ 
 	background: #EDECEC; 
-	padding:5px
+	padding:10px
 }
 
 .row.row-align-bottom > div {
@@ -70,7 +70,19 @@ body{
 	margin-right: 3px; 
 }
 
-
+.movie-title {
+	font-size: 20px;
+	 font-weight: bold; 
+	 display:inline;
+}
+.movie-label {
+	 font-weight: bold; 
+	 display:inline;
+}
+.movie-text {
+	 font-weight: normal; 
+	 display:inline;
+}
 .col-xs-05, .col-xs-115, .col-xs-1 {
     float: left;
     min-height: 1px;

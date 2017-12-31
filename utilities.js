@@ -22,31 +22,71 @@ function disableAllTabs() {
 
 function buildViewMovieRecord(id,movie,cast,genre) {
 	//console.log(movie);
-	var obj=$("#movietemplate").clone(true,true).attr('id', 'movie-'+ id).insertAfter("#movietemplate");
+	//return;
+	var obj=$("#movieview-t").clone(true,true).attr('id', 'movieview-'+ id).insertAfter("#movieview-t");
 	var thumb = movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
 	var txt = "";	
-	txt+=		'<strong>'+movie['title']+'</strong>';
-	if(debug) txt+= ' id:'+movie['intid'];
-	txt+= 		' Regia:'+movie['director'];
-	txt+= 		' Anno:'+movie['year'];
-	if(debug) txt+= ' File:'+movie['filename'];
-	txt+= 		'<br>';
-	txt+= 		' Cast:';
+	var txtcast = "";
+	var txtgenre = "";
+	var txtdebug = "";
+	if(debug) {
+		txtdebug = " (";
+		txtdebug+= ' id:'+movie['intid'];
+		txtdebug+= ' File:'+movie['filename']
+		txtdebug = ")";
+	}
 	for(var i=0,s=''; i<cast.length; i++,s=',') {
-		txt+= 	s+cast[i];
+		txtcast+= 	s+cast[i];
 	}	
-	txt+= 		'<br>';
-	txt+= 		' Genere:';
 	for(var i=0,s=''; i<genre.length; i++,s=',') {
 		if(genre[i].startsWith('_') && !debug) continue;
-		txt+= 	s+genre[i];
+		txtgenre+= 	s+genre[i];
 	}		
-	txt+= 		'<br>';
-	txt+= 		movie['plot'];	
+	obj.attr('index',id);
 	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
-	obj.find('#idplay').attr('index',id);
-	obj.find('#idmovietext').html(txt);
+	obj.find('#idtitle').html(movie['title']);
+	obj.find('#iddirector').html(movie['director']);
+	obj.find('#idyear').html(movie['year']);
+	obj.find('#idcast').html(txtcast);
+	obj.find('#idgenre').html(txtgenre);
+	obj.find('#iddebug').html(txtdebug);
+	obj.find('#idplot').html(movie['plot']);
 		
+	obj.show();
+	return(obj);
+}
+
+
+function buildEditMovieRecord(id,movie,cast,genre) {
+	console.log("buildEditMovieRecord "+id);
+	var obj=$("#movieedit-t").clone(true,true).attr('id', 'movieedit-'+ id).insertAfter("#movieedit-t");
+	var thumb = movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
+	var txt = "";	
+	var txtcast = "";
+	var txtgenre = "";
+	var txtdebug = "";
+	if(debug) {
+		txtdebug = " (";
+		txtdebug+= ' id:'+movie['intid'];
+		txtdebug+= ' File:'+movie['filename']
+		txtdebug = ")";
+	}
+	for(var i=0,s=''; i<cast.length; i++,s=',') {
+		txtcast+= 	s+cast[i];
+	}	
+	for(var i=0,s=''; i<genre.length; i++,s=',') {
+		if(genre[i].startsWith('_') && !debug) continue;
+		txtgenre+= 	s+genre[i];
+	}		
+	obj.attr('index',id);
+	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
+	obj.find('#idtitle').val(movie['title']);
+	obj.find('#iddirector').val(movie['director']);
+	obj.find('#idyear').val(movie['year']);
+	obj.find('#idcast').html(txtcast);
+	obj.find('#idgenre').html(txtgenre);
+	obj.find('#iddebug').html(txtdebug);
+	obj.find('#idplot').html(movie['plot']);
 	obj.show();
 	return(obj);
 }

@@ -148,7 +148,6 @@ if($res = $mysqli->query($query)) {
 		//trigger_error ($query,E_USER_NOTICE);
 		if($res = $mysqli->query($query)) {
 			while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-				//trigger_error ($row['cast'],E_USER_NOTICE);
 				$row['cast'] 		= htmlentities(utf8_encode($row['cast']), 0, "UTF-8");
 				array_push($cast,$row['cast']);
 			}
@@ -156,7 +155,6 @@ if($res = $mysqli->query($query)) {
 		$query = "select distinct videogenre.genre from videogenre join videometadatagenre on videogenre.intid = videometadatagenre.idgenre where videometadatagenre.idvideo = ".$m['intid'];
 		if($res = $mysqli->query($query)) {
 			while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-				//trigger_error ($row['cast'],E_USER_NOTICE);
 				$row['genre'] 		= htmlentities(utf8_encode($row['genre']), 0, "UTF-8");
 				array_push($genre,$row['genre']);
 			}
