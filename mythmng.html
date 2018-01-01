@@ -49,9 +49,6 @@
 					<!-- Tab search -->
 					<div role="tabpanel" class="tab-pane" id="search">
 						<!-- Genre buttons -->
-						<div class='row'>
-							<span class="glyphicon glyphicon-triangle-bottom divhide" target="searchgdiv" aria-hidden="true" ></span>
-						</div>
 						<div class='searchgdiv'>						
 							<div class='row'>
 								<div class="row">
@@ -83,28 +80,31 @@
 							</div>						
 						</div>						
 						<!-- Text and other buttons -->
-						<div class='row'>
-							<span class="glyphicon glyphicon-triangle-bottom divhide" target="orderdiv" aria-hidden="true" ></span>
-						</div>
 						<div class='orderdiv'>						
 							<div class='row'>
 								<div class='btn-group paddedbtn'>
 									<div class="col-md-12">
-										<button class='btn btn-warning insertdate' >Ultimi inseriti OFF</button>
-										Per pagina<input id='page_limit' width='10' value=''></input>
+											<strong>Ordine</strong><select id="ordered" class='btn btn-warning selectpicker'>
+												<option value="0" selected>Titolo</option>
+												<option value="1">Ultimi inseriti</option>
+												<option value="2">Anno</option>
+											</select>
+											<strong>Pagine</strong><select id="movies4page" class='btn btn-warning selectpicker'>
+												<option value="10">10</option>
+												<option value="20" selected >20</option>
+												<option value="50">50</option>
+												<option value="9999">All</option>
+											</select>
 									</div>
 								</div>
 							</div>						
-						</div>
-						<div class='row'>
-							<span class="glyphicon glyphicon-triangle-bottom divhide" target="commanddiv" aria-hidden="true" ></span>
 						</div>
 						<div class='commanddiv'>						
 							<div class='row'>
 								<div class='btn-group paddedbtn'>
 									<button class='btn btn-info 	onbarbtn reset'>Reset</button>
 									<button id="xx" class='btn btn-primary 	onbarbtn dbug'>Debug OFF</button>
-									<button class='btn btn-success 	onbarbtn view'>Visualizza</button>
+									<button class='btn btn-success onbarbtn viewbtn' page="1">Visualizza</button>
 								</div>
 							</div>						
 						</div>
@@ -178,11 +178,11 @@
 </div>	
 
 <!-- movie view template -->
-<div id="movieview-t" class="d-flex p-2" style="display:none;" index="movieid">
+<div id="movieview-t" style="display:none;" index="movieid">
 	<div class="row" id="rowview">
 		<div class="col-xs-2 col-md-1">
 			<a href="#" class="thumbnail">
-				<img id="idcover" class="thumberror" src="" alt="No image">
+				<img id="idcover" src="" alt="No image">
 			</a>
 		</div>
 		<div id="idicons" class="col-xs-05">
@@ -198,13 +198,8 @@
 		</div>
 		<div class="col-xs-15">
 			<div class="row" >
-				<div id="idtitle" class="movie-title"></div>
-				<div/>
-				<span class="movie-label">Regia:</span><div id="iddirector" class="movie-text"></div>
-				<span class="movie-label">Anno:</span><div id="idyear" class="movie-text"></div>
-				<div/><span class="movie-label">Cast:</span><div id="idcast" class="movie-text"></div>
-				<div/><span class="movie-label">Genere:</span><div id="idgenre" class="movie-text"></div>
-				<div/><div id="iddebug" class="movie-text"></div>
+				<div id="idtitle" class="movie-title"></div><br>
+				<div id="details"/>
 			</div>
 			<div class="row" >
 				<div id="idplot" class="movie-plot"></div>

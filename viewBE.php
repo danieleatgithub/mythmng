@@ -49,25 +49,43 @@ if(!$mysqli->query($query)) {
 $query = "";
 $where = "";
 $having = "";
-$order = " ORDER BY videometadata.title ";
+$order = "";
 $genre_mode = " OR ";
-
+$page = 1;
 $debug .= print_r($_POST,true);
 
 $insertdate_on = false;
-$page_limit = 9999;
+$movies4page = 20;
 $title = "";
+$limit = "";
 
-if(isset($_POST['insertdate_on']) && $_POST['insertdate_on'] == 'true' ) $insertdate_on = true;
 
-
-if(isset($_POST['page_limit'])) {
-	$page_limit = intval($_POST['page_limit']);
-	if($page_limit <= 0 || $page_limit > 9999) $page_limit = 9999;
+if(isset($_POST['page'])) {
+	$page = intval($_POST['page']);
+	if($page <= 0 || $page > 9999) $page = 1;
 }
 
-if($insertdate_on)  $order = " ORDER BY videometadata.insertdate DESC limit ". $page_limit . " ";
-else 				$order = " ORDER BY videometadata.title ASC limit ". $page_limit . " ";
+if(isset($_POST['movies4page'])) {
+	$movies4page = intval($_POST['movies4page']);
+	if($movies4page <= 0 || $movies4page > 9999) $movies4page = 20;
+}
+
+if(isset($_POST['ordered'])) {
+	if($_POST['ordered'] == "0") {
+		$order = " ORDER BY videometadata.title "; 
+		$limit = " ASC limit ". $movies4page . " ";
+	} 
+	if($_POST['ordered'] == "1") {
+		$order = " ORDER BY videometadata.insertdate";
+		$limit = " DESC limit ". $movies4page . " ";
+	}
+	if($_POST['ordered'] == "2") {
+		$order = " ORDER BY videometadata.year ";
+		$limit = " DESC limit ". $movies4page . " ";
+	}  
+}
+
+
 
 if(isset($_POST['title'])) $title = $_POST['title'];
 
@@ -96,6 +114,14 @@ if(isset($_POST['genre'])) {
 		"videometadatagenre.idvideo = videometadata.intid ".
 		$where . 
 		$having . 
+		$order .
+		$limit;
+	$qcount = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
+		"videometadata ".
+		" JOIN videometadatagenre ON ". 
+		"videometadatagenre.idvideo = videometadata.intid ".
+		$where . 
+		$having . 
 		$order;
 }
 
@@ -114,21 +140,42 @@ if(!isset($_POST['genre'])) {
 			$s = " AND ";
 		}
 	}
-	$query = "SELECT DISTINCT videometadata.* FROM ".
-		"videometadata ".
+	$query = "SELECT DISTINCT videometadata.* FROM videometadata ".
+		$where .
+		$order .
+		$limit;
+	$qcount = "SELECT DISTINCT videometadata.* FROM videometadata ".
 		$where .
 		$order;
 }
 
+
+
+$debug .= "<br>".$qcount;
 $debug .= "<br>".$query;
 //trigger_error ($query,E_USER_NOTICE);
 
 $cnt=0;
+$totalmovies = 0;
 $out="";
 $rout = array();
 $movie = array();
+if($res = $mysqli->query($qcount)) {
+	$totalmovies = $res->num_rows;
+	trigger_error ($totalmovies,E_USER_NOTICE);
+} else {
+	$response_array['error']=true;
+	$response_array['count'] = 0;
+	$response_array['out'] = "";
+	$response_array['debug']=$debug;							
+	$response_array['message'] = $mysqli->error;	
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
+}
 
 if($res = $mysqli->query($query)) {
+	
 	while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
 		//trigger_error ($row['plot'],E_USER_NOTICE);
 		$row['title'] 		= htmlentities(utf8_encode($row['title']), 0, "UTF-8");
@@ -170,10 +217,10 @@ if($res = $mysqli->query($query)) {
 	}
 	
 	$response_array['error']=false;
-	$response_array['count'] = $cnt;
+	$response_array['count'] = $totalmovies;
 	$response_array['out'] = json_encode($rout);
 	$response_array['debug']= $debug;							
-	$response_array['message'] = "Found ".$cnt." recording";	
+	$response_array['message'] = "Found ".$totalmovies." recording";	
 	header('Content-type: application/json');
 	echo json_encode($response_array);	
 	exit;

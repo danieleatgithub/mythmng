@@ -4,17 +4,16 @@
 $('.reset').on('click', function() {
   $('#result-'+$(this).data('target')).addClass('hide');
   $('#freetxt').val("");
-  $('#page_limit').val("");
+  $('#movies4page').val("20");
   $('#title_in').val("");
   $('#divmsg').html('');
   $('#divout').empty();
   $('#divdeb').html('');
   debug 		= false;
-  insertdate_on = false;
   genre_and 	= false;
   $('.genre_and').html('OR mode');
   $('.dbug').html('Debug OFF');
-  $('.insertdate').html('Ultimi inseriti OFF');
+  $('.ordered').val("0");
   $('.watched').val("0");
   $.each($('.genre'), function( index, value ) {
 	if($(value).hasClass("active")) {
@@ -179,16 +178,20 @@ $('.thumberror').error(function(){
 	console.log("thumberror");
 }).attr('src', '/mythmng/nopic.png');
 
-$('.view').on('click', function() {
-   var page_limit 		= $('#page_limit').val();
-   var title 			= $('#title_in').val();
-   var watched			= $('.watched').val();
-   var genre = [];
+// class viewbtn
+$('.viewbtn').on('click', function() {
+   var ordered 		= $('#ordered').val();
+   var movies4page 	= $('#movies4page').val();
+   var title 		= $('#title_in').val();
+   var watched		= $('.watched').val();
+   var page 		= $(this).attr("page");
+   var genre 		= [];
    $.each($('.genre'), function( index, value ) {
 	if($(value).hasClass("active")) {
 		genre.push($(value).attr("name"));
 	}	
 	});
+	console.log(page);
 	$('#divout').empty();
 	$.ajax({ 
 		type: "POST",
@@ -200,7 +203,9 @@ $('.view').on('click', function() {
 				watched: watched,
 				title: title,
 				insertdate_on: insertdate_on,
-				page_limit: page_limit
+				page: page,
+				movies4page: movies4page,
+				ordered: ordered
 				},
 		success: function( response ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
@@ -208,7 +213,8 @@ $('.view').on('click', function() {
 				$('#divmsg').html(getSuccess(response.message));
 				records = JSON.parse(response.out);
 				var count  = response.count;
-					
+				// starting_from = response.next_start;	
+				
 				// Build record
 				$('#divout').append('\
 					<div class="container-fluid ltab">\

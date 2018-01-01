@@ -72,17 +72,10 @@ body{
 
 .movie-title {
 	font-size: 20px;
-	 font-weight: bold; 
-	 display:inline;
+	font-weight: bold; 
+	display:inline;
 }
-.movie-label {
-	 font-weight: bold; 
-	 display:inline;
-}
-.movie-text {
-	 font-weight: normal; 
-	 display:inline;
-}
+
 .col-xs-05, .col-xs-115, .col-xs-1 {
     float: left;
     min-height: 1px;
@@ -90,12 +83,7 @@ body{
     padding-right: 15px;
     position: relative;
 }
-.col-xs-1 {
-    width: 0.000%;
-}
-.col-xs-05 {
-    width: 0.000%;
-}
+
 .col-xs-115 {
     width: 85.000%;
 }

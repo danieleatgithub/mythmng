@@ -30,10 +30,10 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 	var txtgenre = "";
 	var txtdebug = "";
 	if(debug) {
-		txtdebug = " (";
+		txtdebug = "<br>(";
 		txtdebug+= ' id:'+movie['intid'];
 		txtdebug+= ' File:'+movie['filename']
-		txtdebug = ")";
+		txtdebug = ")<br>";
 	}
 	for(var i=0,s=''; i<cast.length; i++,s=',') {
 		txtcast+= 	s+cast[i];
@@ -42,16 +42,29 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 		if(genre[i].startsWith('_') && !debug) continue;
 		txtgenre+= 	s+genre[i];
 	}		
+	// obj.attr('index',id);
+	// obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
+	// obj.find('#idtitle').html(movie['title']);
+	// obj.find('#iddirector').html(movie['director']);
+	// obj.find('#idyear').html(movie['year']);
+	// obj.find('#idcast').html(txtcast);
+	// obj.find('#idgenre').html(txtgenre);
+	// obj.find('#iddebug').html(txtdebug);
+	// obj.find('#idplot').html(movie['plot']);
+
+
 	obj.attr('index',id);
 	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
-	obj.find('#idtitle').html(movie['title']);
-	obj.find('#iddirector').html(movie['director']);
-	obj.find('#idyear').html(movie['year']);
-	obj.find('#idcast').html(txtcast);
-	obj.find('#idgenre').html(txtgenre);
-	obj.find('#iddebug').html(txtdebug);
+	obj.find('#idtitle').html(movie['title']+' ('+movie['year']+')');
+	// obj.find('#iddirector').html(movie['director']);
+	// obj.find('#idyear').html(movie['year']);
+	// obj.find('#idcast').html(txtcast);
+	// obj.find('#idgenre').html(txtgenre);
+	// obj.find('#iddebug').html(txtdebug);
+	obj.find('#details').html('<strong>Regia:</strong> '+movie['director']+' <strong>Genere:</strong>'+txtgenre+' <strong>Cast:</strong>'+txtcast+txtdebug);
 	obj.find('#idplot').html(movie['plot']);
 		
+	
 	obj.show();
 	return(obj);
 }
