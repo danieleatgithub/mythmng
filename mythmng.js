@@ -11,11 +11,14 @@ $('.reset').on('click', function() {
   $('#divdeb').html('');
   debug 		= false;
   genre_and 	= false;
+  descending 	= false;
   $('.genre_and').html('OR mode');
   $('.dbug').html('Debug OFF');
+  $('.ascdesc').html('Decrescente');
   $('.ordered').val("0");
   $('.watched').val("0");
-  $.each($('.genre'), function( index, value ) {
+  $('#pages').empty();
+ $.each($('.genre'), function( index, value ) {
 	if($(value).hasClass("active")) {
 	  $(value).removeClass("active")
 	}	
@@ -151,15 +154,18 @@ $('.dbug').on('click', function() {
   }
 });
 
-// insertdate toggler
-$('.insertdate').on('click', function() {
-  insertdate_on = !insertdate_on;
-  if(insertdate_on == true) {
-	$('.insertdate').html('Ultimi inseriti ON');
+// ascdesc toggler
+$('.ascdesc').on('click', function() {
+  descending = !descending;
+  if(descending == true) {
+	$('.ascdesc').html('Crescente');
   } else {
-	$('.insertdate').html('Ultimi inseriti OFF'); 
+	$('.ascdesc').html('Decrescente'); 
   }
 });
+
+
+
 
 // genre toggler
 $('.genre').on('click', function() {
@@ -179,70 +185,7 @@ $('.thumberror').error(function(){
 }).attr('src', '/mythmng/nopic.png');
 
 // class viewbtn
-$('.viewbtn').on('click', function() {
-   var ordered 		= $('#ordered').val();
-   var movies4page 	= $('#movies4page').val();
-   var title 		= $('#title_in').val();
-   var watched		= $('.watched').val();
-   var page 		= $(this).attr("page");
-   var genre 		= [];
-   $.each($('.genre'), function( index, value ) {
-	if($(value).hasClass("active")) {
-		genre.push($(value).attr("name"));
-	}	
-	});
-	console.log(page);
-	$('#divout').empty();
-	$.ajax({ 
-		type: "POST",
-		url: "/mythmng/viewBE.php", 
-		dataType: "json", 
-		data: { 
-				genre:genre, 
-				genre_and: genre_and,
-				watched: watched,
-				title: title,
-				insertdate_on: insertdate_on,
-				page: page,
-				movies4page: movies4page,
-				ordered: ordered
-				},
-		success: function( response ) {
-			if(debug) $('#divdeb').html(getInfo(response.debug));
-			if(!response.error) {
-				$('#divmsg').html(getSuccess(response.message));
-				records = JSON.parse(response.out);
-				var count  = response.count;
-				// starting_from = response.next_start;	
-				
-				// Build record
-				$('#divout').append('\
-					<div class="container-fluid ltab">\
-					');
-				for(var i=0; i<records.length; i++) {
-					console.log(i);
-					movie=records[i]['movie'];
-					cast=records[i]['cast'];
-					genre=records[i]['genre'];
-					var obj = buildViewMovieRecord(i,movie,cast,genre);
-					$('#divout').append(obj);
-				}
-				$('#divout').append('\
-					</div>');
-					console.log("show2");
-			} else {
-				$('#divmsg').html(getAlert(response.message));
-			}			
-		},
-		error: function( request, error ) {
-			if(debug) $('#divdeb').html(getInfo(response.debug));
-			$('#divmsg').html(getAlert(error));			
-		}
-    });
-
-});
-
-
+$('.viewbtn').on('click', viewbtn_click);
 
 $('.savequery').on('click', function() {
   var res = $('#builder-'+$(this).data('target')).queryBuilder('getSQL', $(this).data('stmt'));

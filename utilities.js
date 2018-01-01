@@ -103,3 +103,68 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	obj.show();
 	return(obj);
 }
+
+
+// class viewbtn
+function viewbtn_click() {
+   var ordered 		= $('#ordered').val();
+   var movies4page 	= $('#movies4page').val();
+   var title 		= $('#title_in').val();
+   var watched		= $('.watched').val();
+   var page 		= $(this).attr("page");
+   var genre 		= [];
+   $.each($('.genre'), function( index, value ) {
+	if($(value).hasClass("active")) {
+		genre.push($(value).attr("name"));
+	}	
+	});
+	$('#divout').empty();
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/viewBE.php", 
+		dataType: "json", 
+		data: { 
+				genre:genre, 
+				genre_and: genre_and,
+				watched: watched,
+				title: title,
+				page: page,
+				movies4page: movies4page,
+				descending: descending,
+				ordered: ordered
+				},
+		success: function( response ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(!response.error) {
+				$('#divmsg').html(getSuccess(response.message));
+				records = JSON.parse(response.out);
+				var count  = response.count;
+				$('#pages').empty();
+				for(var i=1; i<(count/movies4page)+1; i++) {
+					$('#pages').append('<button class="btn btn-success onbarbtn viewbtn" page="'+i+'">'+i+'</button>');
+				}
+				//rebind event
+				$('.viewbtn').on('click', viewbtn_click);
+				// Build record
+				$('#divout').append('<div class="container-fluid ltab">');
+				for(var i=0; i<records.length; i++) {
+					//console.log(i);
+					movie=records[i]['movie'];
+					cast=records[i]['cast'];
+					genre=records[i]['genre'];
+					var obj = buildViewMovieRecord(i,movie,cast,genre);
+					$('#divout').append(obj);
+				}
+				$('#divout').append('</div>');
+				//console.log("end view");
+			} else {
+				$('#divmsg').html(getAlert(response.message));
+			}			
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+    });
+
+}

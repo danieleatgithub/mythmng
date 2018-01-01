@@ -54,34 +54,38 @@ $genre_mode = " OR ";
 $page = 1;
 $debug .= print_r($_POST,true);
 
-$insertdate_on = false;
 $movies4page = 20;
 $title = "";
 $limit = "";
-
+$ordermode = "ASC";
 
 if(isset($_POST['page'])) {
 	$page = intval($_POST['page']);
 	if($page <= 0 || $page > 9999) $page = 1;
 }
 
+if(isset($_POST['descending'])) {	
+	if($_POST['descending'] == "true")  $ordermode = "DESC";
+}
 if(isset($_POST['movies4page'])) {
 	$movies4page = intval($_POST['movies4page']);
 	if($movies4page <= 0 || $movies4page > 9999) $movies4page = 20;
 }
 
+$start = $movies4page * ($page - 1);
+
 if(isset($_POST['ordered'])) {
 	if($_POST['ordered'] == "0") {
 		$order = " ORDER BY videometadata.title "; 
-		$limit = " ASC limit ". $movies4page . " ";
+		$limit = " ".$ordermode." limit ".$start.",".$movies4page . " ";
 	} 
 	if($_POST['ordered'] == "1") {
 		$order = " ORDER BY videometadata.insertdate";
-		$limit = " DESC limit ". $movies4page . " ";
+		$limit = " ".$ordermode." limit ".$start.",".$movies4page . " ";
 	}
 	if($_POST['ordered'] == "2") {
 		$order = " ORDER BY videometadata.year ";
-		$limit = " DESC limit ". $movies4page . " ";
+		$limit = " ".$ordermode." limit ".$start.",".$movies4page . " ";
 	}  
 }
 

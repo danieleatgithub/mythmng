@@ -1,5 +1,5 @@
 var debug 			= false;
-var insertdate_on 	= false;
+var descending 		= false;
 var genre_and 		= false;
 var info 	= [];
 var records = [];
