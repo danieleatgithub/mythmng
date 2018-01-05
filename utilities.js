@@ -19,7 +19,7 @@ function disableAllTabs() {
 }
 
 function buildViewMovieRecord(id,movie,cast,genre) {
-	//console.log(movie);
+	console.log(genre);
 	var obj=$("#movie-t").clone(true,true).attr('id', 'movie-'+ id).insertAfter("#movie-t");
 	var thumb = movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
 	var txt = "";	
@@ -46,6 +46,7 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
 	obj.find('#idtitle').html(movie['title']+' ('+movie['year']+')');
 	obj.find('#details').html('<strong>Regia:</strong> '+movie['director']+' <strong>Genere:</strong>'+txtgenre+' <strong>Cast:</strong>'+txtcast+txtdebug);
+	obj.find('#idgenre').html(txtgenre);
 	obj.find('#idplot').html(movie['plot']);
 	obj.show();
 	return(obj);
@@ -69,10 +70,26 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	for(var i=0,s=''; i<cast.length; i++,s=',') {
 		txtcast+= 	s+cast[i];
 	}	
-	for(var i=0,s=''; i<genre.length; i++,s=',') {
-		if(genre[i].startsWith('_') && !debug) continue;
-		txtgenre+= 	s+genre[i];
-	}		
+	
+	divgen=obj.find('#idgenre');
+	var type = "btn-default";
+	divgen.append('<center>');
+	for(var i=0; i<genre_strings.length; i++) {
+		type = "btn-default";
+		if(genre.indexOf(genre_strings[i]['genre']) > -1) {
+			type = "btn-warning";
+		}
+		text = '<button type="button" class="btn btn_edit_genre '+type+'" intid="'+genre_strings[i]['intid']+'"">';
+		text += genre_strings[i]['genre'];
+		text += '</button>';
+		divgen.append(text);
+	}
+	divgen.append('</center>');
+	// view btn_edit_genre detail
+	$('.btn_edit_genre').on('click', edit_genre);
+
+
+	
 	obj.attr('index',id);
 	obj.find('#ideok').attr('index',id);
 	obj.find('#ideabort').attr('index',id);
@@ -81,7 +98,6 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	obj.find('#iddirector').val(movie['director']);
 	obj.find('#idyear').val(movie['year']);
 	obj.find('#idcast').html(txtcast);
-	obj.find('#idgenre').html(txtgenre);
 	obj.find('#iddebug').html(txtdebug);
 	obj.find('#idplot').html(movie['plot']);
 	obj.show();
@@ -89,6 +105,21 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 }
 
 
+function edit_genre() {
+	console.log(this);
+	var newvalue=true;
+	if($(this).hasClass("btn-warning")) {
+		newvalue=false;
+		$(this).removeClass("btn-warning");
+		$(this).addClass("btn-default");
+	} else {
+		newvalue=true;
+		$(this).removeClass("btn-default");
+		$(this).addClass("btn-warning");
+		
+	}
+	
+}
 // class viewbtn
 function view_page(page) {
    var ordered 		= $('#ordered').val();

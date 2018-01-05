@@ -50,6 +50,7 @@ $('.moviezoom').on('click', function() {
 	console.log("editabort "+index);
  });
  
+ 
 // editabort 
 $('.editabort').on('click', function() {
 	var index = $(this).attr('index');

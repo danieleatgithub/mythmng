@@ -92,8 +92,24 @@ if(isset($_POST['ordered'])) {
 
 if(isset($_POST['title'])) $title = $_POST['title'];
 
+// Query for movies without genre (AND mode and NO GENRE)
+if(isset($_POST['genre_and']) && $_POST['genre_and'] == 'true' && (!isset($_POST['genre']) || sizeof($_POST['genre']) == 0)) {
+	
+	if(isset($_POST['watched'])) {
+		if($_POST['watched'] == "1") $where = " AND videometadata.watched = FALSE ";
+		if($_POST['watched'] == "2") $where = " AND videometadata.watched = TRUE ";
+	}
+	
+	$query = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
+		"videometadata ".
+		" LEFT JOIN videometadatagenre ON ". 
+		"videometadatagenre.idvideo = videometadata.intid where videometadatagenre.idvideo is null ".
+		$where.
+		$order;
+}
 
-if(isset($_POST['genre'])) {
+// Query for GENRE in AND or OR mode with at least one genre
+if(isset($_POST['genre']) && strlen($query) == 0) {
 	// Genre in and mode
 	if(isset($_POST['genre_and']) && $_POST['genre_and'] == 'true') {
 		$having = " HAVING COUNT(videometadata.title) = " . sizeof($_POST['genre']);
@@ -120,7 +136,8 @@ if(isset($_POST['genre'])) {
 		$order;
 }
 
-if(!isset($_POST['genre'])) {
+// Query without genre
+if(!isset($_POST['genre']) && strlen($query) == 0 ) {
 	$conditions = array();
 	if(isset($_POST['watched'])) {
 		if($_POST['watched'] == "1") array_push($conditions," videometadata.watched = FALSE ");

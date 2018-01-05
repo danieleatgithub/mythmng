@@ -202,15 +202,22 @@
 		</div>
 		<div class="col-xs-115">
 			<div class="row" >
-				<strong>Titolo:</strong><input id='idtitle' class="form-control input-sm" value=''></input>
+				<div class="col-md-12">
+					<strong>Titolo:</strong><input id='idtitle' class="form-control input-sm" value=''></input>
+				</div>
 			</div>
 			<div class="row" >
-				<strong>Regia:</strong><input id='iddirector' class="form-control input-sm" value=''></input>
-
-
-				<div/><span class="movie-label">Cast:</span><div id="idcast" class="movie-text"></div>
-				<div/><span class="movie-label">Genere:</span><div id="idgenre" class="movie-text"></div>
-				<div/><div id="iddebug" class="movie-text"></div>
+				<div class="col-md-6">
+					<strong>Regia:</strong><input id='iddirector' class="form-control input-sm" value=''></input>
+				</div>
+				<div class="col-md-6">
+					<strong>Anno:</strong><input id='idyear' class="form-control input-sm" value=''></input>
+				</div>
+				<div class="col-md-12">
+					<strong>Genere:</strong><div id="idgenre" class="btn-toolbar" role="toolbar" aria-label="xxxxx"></div>
+					<div/><span class="movie-label">Cast:</span><div id="idcast" class="movie-text"></div>
+					<div/><div id="iddebug" class="movie-text"></div>
+				</div>
 			</div>
 			<div class="row" >
 				<textarea id="idplot" class="form-control" style="resize:vertical;"></textarea>'

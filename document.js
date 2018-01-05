@@ -4,10 +4,10 @@ var genre_and 		= false;
 var info 	= [];
 var records = [];
 var oldrecord = [];
+var genre_strings = [];
 
 $(document).ready(function() {
 	var genre = [];
-	var genre_strings = [];
 	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/mythmngBE.php", 
