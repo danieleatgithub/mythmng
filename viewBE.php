@@ -19,7 +19,6 @@ $out = "";
 $error = "";
 $debug = "";
 
-
 /* check connection */
 $mysqli = new mysqli($_db['ip'], $_db['user'], $_db['password'], "mythconverg");
 if ($mysqli->connect_errno) { 
@@ -118,14 +117,6 @@ if(isset($_POST['genre'])) {
 		"videometadatagenre.idvideo = videometadata.intid ".
 		$where . 
 		$having . 
-		$order .
-		$limit;
-	$qcount = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
-		"videometadata ".
-		" JOIN videometadatagenre ON ". 
-		"videometadatagenre.idvideo = videometadata.intid ".
-		$where . 
-		$having . 
 		$order;
 }
 
@@ -136,7 +127,6 @@ if(!isset($_POST['genre'])) {
 		if($_POST['watched'] == "2") array_push($conditions," videometadata.watched = TRUE ");
 	}
 	if(strlen($title)) array_push($conditions," videometadata.title LIKE '%".$title."%' ");	
-	trigger_error (print_r($conditions,true),E_USER_NOTICE);
 	if(!empty($conditions)) {
 		$s = " WHERE ";
 		foreach($conditions as $k) {
@@ -146,17 +136,10 @@ if(!isset($_POST['genre'])) {
 	}
 	$query = "SELECT DISTINCT videometadata.* FROM videometadata ".
 		$where .
-		$order .
-		$limit;
-	$qcount = "SELECT DISTINCT videometadata.* FROM videometadata ".
-		$where .
 		$order;
 }
 
-
-
-$debug .= "<br>".$qcount;
-$debug .= "<br>".$query;
+$debug .= "<br>".$query . $limit;
 //trigger_error ($query,E_USER_NOTICE);
 
 $cnt=0;
@@ -164,9 +147,8 @@ $totalmovies = 0;
 $out="";
 $rout = array();
 $movie = array();
-if($res = $mysqli->query($qcount)) {
+if($res = $mysqli->query($query)) {
 	$totalmovies = $res->num_rows;
-	trigger_error ($totalmovies,E_USER_NOTICE);
 } else {
 	$response_array['error']=true;
 	$response_array['count'] = 0;
@@ -178,7 +160,7 @@ if($res = $mysqli->query($qcount)) {
 	exit;
 }
 
-if($res = $mysqli->query($query)) {
+if($res = $mysqli->query($query. $limit)) {
 	
 	while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
 		//trigger_error ($row['plot'],E_USER_NOTICE);
@@ -189,6 +171,13 @@ if($res = $mysqli->query($query)) {
 		$row['tagline']  	= htmlentities(utf8_encode($row['tagline']), 0, "UTF-8");
 		$row['studio']  	= htmlentities(utf8_encode($row['studio']), 0, "UTF-8");
 		array_push($movie,$row);
+		$cover = pathinfo($row['coverfile']);
+		$thumbfile = $_fs['thumbnail'].$cover['filename'].'.jpg';
+		$coverfile = $_fs['coverart'].$row['coverfile'];
+		if(!file_exists($thumbfile) && file_exists($coverfile) && !is_dir($coverfile)) {
+			generate_image_thumbnail($coverfile, $thumbfile);
+			$debug .= "<br>Generated thumbnail:".$thumbfile." from:".$_fs['coverart'].$row['coverfile']."";				
+		}		
 		//trigger_error ($row['plot'],E_USER_NOTICE);
 	}
 	foreach($movie as $m) {
@@ -239,4 +228,42 @@ if($res = $mysqli->query($query)) {
 	exit;
 }
 exit;
+
+
+function generate_image_thumbnail($source_image_path, $thumbnail_image_path)
+{
+    list($source_image_width, $source_image_height, $source_image_type) = getimagesize($source_image_path);
+    switch ($source_image_type) {
+        case IMAGETYPE_GIF:
+            $source_gd_image = imagecreatefromgif($source_image_path);
+            break;
+        case IMAGETYPE_JPEG:
+            $source_gd_image = imagecreatefromjpeg($source_image_path);
+            break;
+        case IMAGETYPE_PNG:
+            $source_gd_image = imagecreatefrompng($source_image_path);
+            break;
+    }
+    if ($source_gd_image === false) {
+        return false;
+    }
+    $source_aspect_ratio = $source_image_width / $source_image_height;
+    $thumbnail_aspect_ratio = THUMBNAIL_IMAGE_MAX_WIDTH / THUMBNAIL_IMAGE_MAX_HEIGHT;
+    if ($source_image_width <= THUMBNAIL_IMAGE_MAX_WIDTH && $source_image_height <= THUMBNAIL_IMAGE_MAX_HEIGHT) {
+        $thumbnail_image_width = $source_image_width;
+        $thumbnail_image_height = $source_image_height;
+    } elseif ($thumbnail_aspect_ratio > $source_aspect_ratio) {
+        $thumbnail_image_width = (int) (THUMBNAIL_IMAGE_MAX_HEIGHT * $source_aspect_ratio);
+        $thumbnail_image_height = THUMBNAIL_IMAGE_MAX_HEIGHT;
+    } else {
+        $thumbnail_image_width = THUMBNAIL_IMAGE_MAX_WIDTH;
+        $thumbnail_image_height = (int) (THUMBNAIL_IMAGE_MAX_WIDTH / $source_aspect_ratio);
+    }
+    $thumbnail_gd_image = imagecreatetruecolor($thumbnail_image_width, $thumbnail_image_height);
+    imagecopyresampled($thumbnail_gd_image, $source_gd_image, 0, 0, 0, 0, $thumbnail_image_width, $thumbnail_image_height, $source_image_width, $source_image_height);
+    imagejpeg($thumbnail_gd_image, $thumbnail_image_path, 90);
+    imagedestroy($source_gd_image);
+    imagedestroy($thumbnail_gd_image);
+    return true;
+}
 ?>

@@ -8,6 +8,7 @@
 </head>
 <body style="margin-bottom: 0px; margin-top: 0px;">
 <span class="glyphicon glyphicon-triangle-bottom divhide" target="maintab"  aria-hidden="true" ></span>
+					
 
 <div class="container-fluid maintab" >
 	<div class="row">
@@ -66,8 +67,8 @@
 								<div class="row">
 									<div class='btn-group paddedbtn'>
 										<div class="col-md-12">
-											<button class='btn btn-warning genre_and' >OR mode</button>
-											<select class='btn btn-warning selectpicker watched'>
+											<button id="genre_and" class='btn btn-warning' >OR mode</button>
+											<select id="watched" class='btn btn-warning selectpicker'>
 												<option value="0">Tutti</option>
 												<option value="1">Da vedere</option>
 												<option value="2">Visti</option>
@@ -89,7 +90,7 @@
 												<option value="1">Ultimi inseriti</option>
 												<option value="2">Anno</option>
 											</select>
-											<button class='btn btn-warning ascdesc' >Decrescente</button>
+											<button id="ascdesc" class='btn btn-warning ' >Decrescente</button>
 											<strong>Pagine</strong><select id="movies4page" class='btn btn-warning selectpicker'>
 												<option value="10">10</option>
 												<option value="20" selected >20</option>
@@ -103,18 +104,14 @@
 						<div class='commanddiv'>						
 							<div class='row'>
 								<div class='btn-group paddedbtn'>
-									<button class='btn btn-info 	onbarbtn reset'>Reset</button>
-									<button id="xx" class='btn btn-primary 	onbarbtn dbug'>Debug OFF</button>
-									<button class='btn btn-success onbarbtn viewbtn' page="1">Visualizza</button>
+									<button id="reset" class='btn btn-info 	onbarbtn'>Reset</button>
+									<button id="dbug" class='btn btn-primary onbarbtn '>Debug OFF</button>
+									<button id="viewbtn" class='btn btn-success onbarbtn'>Visualizza</button>
 								</div>
 							</div>						
 						</div>
-						<div class='pagediv'>						
-							<div class='row'>
-								<div class='btn-group paddedbtn' id="pages">									
-								</div>
-							</div>						
-						</div>					</div>
+					<center><div id="page-selection"></div></center>
+					</div>
 					<!-- Tab custom -->
 					<div role="tabpanel" class="tab-pane" id="usb">
 						<div class='row'>
@@ -140,9 +137,11 @@
 								<div class='row'>
 									<div class="col-md-12">
 										<div class='btn-group paddedbtn'>
-											<button class='btn btn-primary onbarbtn dbug'>Debug OFF</button>
-											<button class='btn btn-success onbarbtn checkdb'>Controlla congruenza DB</button>
-											<button class='btn btn-success onbarbtn checkpic'>Controlla immagini orfane</button>
+											<button class='btn btn-primary onbarbtn'>Debug OFF</button>
+											<button class='btn btn-success onbarbtn'>Controlla congruenza DB</button>
+											<button class='btn btn-success onbarbtn'>Controlla immagini orfane</button>
+											<button class='btn btn-success onbarbtn'>Backup DB</button>
+											<button class='btn btn-success onbarbtn'>Backup completo</button>
 										</div>
 									</div>
 								</div>						
@@ -158,6 +157,7 @@
 										<div class='btn-group paddedbtn'>
 											<button class='btn btn-primary onbarbtn dbug'>Debug OFF</button>
 											<button class='btn btn-success onbarbtn Refresh'>Aggiorna</button>
+											<button class='btn btn-success onbarbtn Refresh'>Raccogli trama</button>
 										</div>
 									</div>
 								</div>						
@@ -183,42 +183,9 @@
 	</div>
 </div>	
 
-<!-- movie view template -->
-<div id="movieview-t" style="display:none;" index="movieid">
-	<div class="row" id="rowview">
-		<div class="col-xs-2 col-md-1">
-			<a href="#" class="thumbnail">
-				<img id="idcover" src="" alt="No image">
-			</a>
-		</div>
-		<div id="idicons" class="col-xs-05">
-			<div class="row">
-				<span id="idzoom" class="glyphicon glyphicon glyphicon-zoom-in moviezoom" aria-hidden="true" />
-			</div>
-			<div class="row">
-				<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit"  aria-hidden="true" />
-			</div>
-			<div class="row">
-				<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" " aria-hidden="true" />
-			</div>
-		</div>
-		<div class="col-xs-15">
-			<div class="row" >
-				<div id="idtitle" class="movie-title"></div><br>
-				<div id="details"/>
-			</div>
-			<div class="row" >
-				<div id="idplot" class="movie-plot"></div>
-			</div>
-		</div>
-	</div>
-	<div class="row" >
-			<div id="idextend"></div>
-	</div>
-</div>
 
-<!-- edit template -->
-<div id="movieedit-t" style="background-color: PaleGoldenRod;  display:none;" index="movieid">
+
+<div id="movieedit-t" style="background-color: PaleGoldenRod;  display:none;" >
 	<div class="row" >
 		<div class="col-xs-2 col-md-1">
 			<a href="#" class="thumbnail">
@@ -227,18 +194,20 @@
 		</div>
 		<div id="idediticons" class="col-xs-05">
 			<div class="row">
-				<span id="ideditok" class="glyphicon glyphicon-ok editok" aria-hidden="true" />
+				<span id="ideok" class="glyphicon glyphicon-ok editok" aria-hidden="true" />
 			</div>
 			<div class="row">
-				<span id="ideditabort" class="glyphicon glyphicon-remove editabort" aria-hidden="true" />
+				<span id="ideabort" class="glyphicon glyphicon-remove editabort" aria-hidden="true" />
 			</div>
 		</div>
 		<div class="col-xs-115">
 			<div class="row" >
-				<div class="col-xs-4"><input id='idtitle' class="form-control input-sm"/></div>
-				<div/>
-				<span class="movie-label">Regia:<div class="col-xs-2"><input id='iddirector' class="form-control input-xs"/></div></span>
-				<span class="movie-label">Anno:<div class="col-xs-2"><input id='idyear' class="form-control input-xs"/></div></span> 
+				<strong>Titolo:</strong><input id='idtitle' class="form-control input-sm" value=''></input>
+			</div>
+			<div class="row" >
+				<strong>Regia:</strong><input id='iddirector' class="form-control input-sm" value=''></input>
+
+
 				<div/><span class="movie-label">Cast:</span><div id="idcast" class="movie-text"></div>
 				<div/><span class="movie-label">Genere:</span><div id="idgenre" class="movie-text"></div>
 				<div/><div id="iddebug" class="movie-text"></div>
@@ -249,6 +218,38 @@
 		</div>
 	</div>
 </div>
+
+
+<!-- movie view template -->
+<div id="movie-t" style="display:none;" >
+	<div class="row" id="view">
+		<div class="col-xs-2 col-md-1">
+			<a href="#" class="thumbnail"><img id="idcover" src="" alt="No image"></a>
+		</div>
+		<div id="idicons" class="col-xs-05">
+			<div class="row">
+				<span id="idzoom" class="glyphicon glyphicon glyphicon-zoom-in moviezoom" aria-hidden="true" />
+			</div>
+			<div class="row">
+				<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit" aria-hidden="true" />
+			</div>
+			<div class="row">
+				<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" " aria-hidden="true" />
+			</div>
+		</div>
+		<div class="col-xs-15">
+			<div class="row" >
+				<div id="idtitle" class="movie-title"></div><br>
+				<div id="details"></div>
+				<div id="idplot" class="movie-plot"></div>
+			</div>
+		</div>
+	</div>
+	<div class="row" id="edit">
+	</div>
+</div>
+
+
 
 
 <link rel="stylesheet" type="text/css" href="/mythmng/navpanel.css" rel="stylesheet">
@@ -263,6 +264,7 @@
 <script type="text/javascript" src="/jquery-ui-multiselect-widget-master/src/jquery.multiselect.filter.js"></script>
 <script type="text/javascript" src="/mythmng/charts/palette.js"></script>
 <script type="text/javascript" src="/mythmng/charts/Chart.js"></script>
+<script type="text/javascript" src="/mythmng/jquery.bootpag.min.js"></script>
 <script src="/mythmng/document.js"></script>	
 
 </body></html>

@@ -1,31 +1,33 @@
 
 
 // reset search tab
-$('.reset').on('click', function() {
+$('#reset').on('click', function() {
   $('#result-'+$(this).data('target')).addClass('hide');
   $('#freetxt').val("");
   $('#movies4page').val("20");
   $('#title_in').val("");
-  $('#divmsg').html('');
+  $('#divmsg').empty();
   $('#divout').empty();
-  $('#divdeb').html('');
+  $('#divdeb').empty();
+  $('#genre_and').html('OR mode');
+  $('#dbug').html('Debug OFF');
+  $('#ascdesc').html('Decrescente');
+  $('#ordered').val("0");
+  $('#watched').val("0");
   debug 		= false;
-  genre_and 	= false;
   descending 	= false;
-  $('.genre_and').html('OR mode');
-  $('.dbug').html('Debug OFF');
-  $('.ascdesc').html('Decrescente');
-  $('.ordered').val("0");
-  $('.watched').val("0");
-  $('#pages').empty();
+  genre_and 	= false;
+  info 	= [];
+  records = [];
+  oldrecord = [];
  $.each($('.genre'), function( index, value ) {
 	if($(value).hasClass("active")) {
 	  $(value).removeClass("active")
 	}	
-  });
-  records = [];
-  oldrecord = [];
- 
+  }); 
+
+$('#page-selection').bootpag({total: 1, maxVisible: 0 });
+
 });
 
 // Hide div from target
@@ -44,64 +46,54 @@ $('.divhide').on('click', function() {
 
 // view movie detail
 $('.moviezoom').on('click', function() {
-	var idicons=$(this).parent().parent();
-	var movieview=idicons.parent().parent();
-	var index = movieview.attr('index');
-	console.log("moviezoom");
-	console.log(idicons);
-	console.log(movieview);
-	console.log(index);
+	var index = $(this).attr('index');
+	console.log("editabort "+index);
  });
  
 // editabort 
 $('.editabort').on('click', function() {
-	var idicons=$(this).parent().parent();
-	var movieedit	= idicons.parent().parent();
-	var movieview	= movieedit.parent().parent().parent();
-	var index		= movieedit.attr('index');
-	console.log("editabort");
-	console.log(idicons);
-	console.log(movieedit);
-	console.log(movieview);
-	console.log(index);
-	oldrecord=records[index];
-	movieview.find('#rowview').show();
-	movieview.find('#idextend').empty();
- });
+	var index = $(this).attr('index');
+	console.log("editabort "+index);
+ 	oldrecord=[];
+	$("#movie-"+index).find("#view").show();
+	$("#movie-"+index).find("#edit").empty();	
+});
  // editok 
 $('.editok').on('click', function() {
-	var idicons=$(this).parent().parent();
-	var movieedit	= idicons.parent().parent();
-	var movieview	= movieedit.parent().parent().parent();
-	var index		= movieedit.attr('index');
-	console.log("editok");
-	console.log(idicons);
-	console.log(movieedit);
-	console.log(movieview);
-	console.log(index);
-	// movieview.find('#rowview').show();
-	// movieview.find('#idextend').empty();
+	var index = $(this).attr('index');
+	console.log("editok "+index);
  });
+ 
+ $('#ordered').on('change', function() {
+	 if($(this).val() == 1) {
+		$('#ascdesc').html('Crescente');
+		descending 	= true;
+	 }
+ });
+ 
 // open editable div
 $('.movieedit').on('click', function() { 
-	var idicons=$(this).parent().parent();
-	var movieview=idicons.parent().parent();
-	var index = movieview.attr('index');
+	var index = $(this).attr('index');
 	console.log("movieedit "+index);
-	console.log(idicons);
-	console.log(movieview);
-	console.log(records[index]['movie']);
 	var movie = records[index]['movie'];
 	var cast  = records[index]['cast'];
 	var genre = records[index]['genre'];
 	var obj = buildEditMovieRecord(index,movie,cast,genre);
-	console.log(obj);
 	oldrecord=records[index];
-	//movieview.find('#rowview').hide();
-	movieview.find('#idextend').append(obj);
-	
- });
+	$("#movie-"+index).find("#edit").html(obj);	
+	$("#movie-"+index).find("#view").hide();
+	plot = obj.find("#idplot")
+	plot.height( plot[0].scrollHeight );
 
+ });
+ 
+$('#page-selection').bootpag({
+            total: 1,
+			maxVisible: 0,
+				}).on("page", function(event, num){
+			view_page(num);
+});
+	
  // play movie on frontend
 $('.movieplay').on('click', function() {
  	var idicons=$(this).parent().parent();
@@ -134,38 +126,35 @@ $('.movieplay').on('click', function() {
  
  
 // genre_and toggler
-$('.genre_and').on('click', function() {
+$('#genre_and').on('click', function() {
   genre_and = !genre_and;
   if(genre_and == true) {
-	$('.genre_and').html('AND mode');
+	$('#genre_and').html('AND mode');
   } else {
-	$('.genre_and').html('OR mode'); 
+	$('#genre_and').html('OR mode'); 
   }
 });
 
 // debug toggler
-$('.dbug').on('click', function() {
+$('#dbug').on('click', function() {
   debug = !debug;
   $('#divdeb').html('');
   if(debug == true) {
-	$('.dbug').html('Debug ON');
+	$('#dbug').html('Debug ON');
   } else {
-	$('.dbug').html('Debug OFF'); 
+	$('#dbug').html('Debug OFF'); 
   }
 });
 
 // ascdesc toggler
-$('.ascdesc').on('click', function() {
+$('#ascdesc').on('click', function() {
   descending = !descending;
   if(descending == true) {
-	$('.ascdesc').html('Crescente');
+	$('#ascdesc').html('Crescente');
   } else {
-	$('.ascdesc').html('Decrescente'); 
+	$('#ascdesc').html('Decrescente'); 
   }
 });
-
-
-
 
 // genre toggler
 $('.genre').on('click', function() {
@@ -185,51 +174,14 @@ $('.thumberror').error(function(){
 }).attr('src', '/mythmng/nopic.png');
 
 // class viewbtn
-$('.viewbtn').on('click', viewbtn_click);
-
-$('.savequery').on('click', function() {
-  var res = $('#builder-'+$(this).data('target')).queryBuilder('getSQL', $(this).data('stmt'));
-  var name = $('#queryname').val();
-  $('#result-'+$(this).data('target')).removeClass('hide')
-    .find('pre').html(
-      res.sql + (res.params ? '\n\n' + JSON.stringify(res.params, null, 2) : '')
-    );
-	$.ajax({ 
-		type: "POST",
-		url: "/x/draft/editBE.php", 
-		dataType: "json", 
-		data: { cmd: "savequery",
-				sql: res.sql, 
-				name: name
-				},
-		success: function( response ) {
-			if(response.error) {
-				alert(response.query+"\n"+response.message);
-			} else {
-				$('#divout').html( response );
-			}
-		}
-    });
+$('#viewbtn').on('click', function() {
+	//console.log("viewbtn click");
+	view_page(1);
 });
 
-$('.customquery').on('click', function() {
-	var name = $(this).data('target');
-	//var rule = $(this).data('rule');
-	//alert(rule);
-//	$('#builder-ware').queryBuilder('setRules',rule);
-	$.ajax({ 
-		type: "POST",
-		url: "/x/draft/editBE.php", 
-		dataType: "html", 
-		data: { cmd: "loadquery",
-				name: name
-				},
-		success: function( response ) {
-				$('#builder-ware').queryBuilder('setRulesFromSQL',response);
-				$('#queryname').val(name);
-		}
-    });
-});
+
+
+
 
 
 
