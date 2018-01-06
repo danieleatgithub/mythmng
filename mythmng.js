@@ -19,7 +19,6 @@ $('#reset').on('click', function() {
   genre_and 	= false;
   info 	= [];
   records = [];
-  oldrecord = [];
  $.each($('.genre'), function( index, value ) {
 	if($(value).hasClass("active")) {
 	  $(value).removeClass("active")
@@ -54,11 +53,12 @@ $('.moviezoom').on('click', function() {
 // editabort 
 $('.editabort').on('click', function() {
 	var index = $(this).attr('index');
-	console.log("editabort "+index);
- 	oldrecord=[];
-	$("#movie-"+index).find("#view").show();
-	$("#movie-"+index).find("#edit").empty();	
+	var videoid = $(this).attr('videoid');
+	var moviecontainer = $("#movie-"+index).find("#edit").parent();
+	moviecontainer.empty();	
+	refresh_video(moviecontainer,videoid,index)
 });
+
  // editok 
 $('.editok').on('click', function() {
 	var index = $(this).attr('index');
@@ -76,11 +76,14 @@ $('.editok').on('click', function() {
 $('.movieedit').on('click', function() { 
 	var index = $(this).attr('index');
 	console.log("movieedit "+index);
+	console.log(records[index]);
 	var movie = records[index]['movie'];
 	var cast  = records[index]['cast'];
 	var genre = records[index]['genre'];
 	var obj = buildEditMovieRecord(index,movie,cast,genre);
-	oldrecord=records[index];
+	console.log($("#movie-"+index).find("#edit"));
+	obj.show();
+	$("#movie-"+index).find("#edit").show();	
 	$("#movie-"+index).find("#edit").html(obj);	
 	$("#movie-"+index).find("#view").hide();
 	plot = obj.find("#idplot")

@@ -3,7 +3,6 @@ var descending 		= false;
 var genre_and 		= false;
 var info 	= [];
 var records = [];
-var oldrecord = [];
 var genre_strings = [];
 
 $(document).ready(function() {

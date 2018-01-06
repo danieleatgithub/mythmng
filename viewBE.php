@@ -52,11 +52,17 @@ $order = "";
 $genre_mode = " OR ";
 $page = 1;
 $debug .= print_r($_POST,true);
+$videoid = array();
 
 $movies4page = 20;
 $title = "";
 $limit = "";
 $ordermode = "ASC";
+
+
+if(isset($_POST['videoid'])) {
+	$videoid = $_POST['videoid'];
+}
 
 if(isset($_POST['page'])) {
 	$page = intval($_POST['page']);
@@ -88,12 +94,26 @@ if(isset($_POST['ordered'])) {
 	}  
 }
 
-
-
 if(isset($_POST['title'])) $title = $_POST['title'];
 
+
+
+// Query with single video list 
+if(sizeof($videoid) > 0 ) {
+	$where = " WHERE ";
+	$s = "";
+	foreach($videoid as $v) {
+		$where .= $s . " videometadata.intid = ".$v;
+		$s = " OR ";
+	}
+	$query = "SELECT DISTINCT videometadata.* FROM videometadata ".
+		$where .
+		" ORDER BY videometadata.intid ";
+}
+
+
 // Query for movies without genre (AND mode and NO GENRE)
-if(isset($_POST['genre_and']) && $_POST['genre_and'] == 'true' && (!isset($_POST['genre']) || sizeof($_POST['genre']) == 0)) {
+if(strlen($query) == 0 && isset($_POST['genre_and']) && $_POST['genre_and'] == 'true' && (!isset($_POST['genre']) || sizeof($_POST['genre']) == 0)) {
 	
 	if(isset($_POST['watched'])) {
 		if($_POST['watched'] == "1") $where = " AND videometadata.watched = FALSE ";
@@ -109,7 +129,7 @@ if(isset($_POST['genre_and']) && $_POST['genre_and'] == 'true' && (!isset($_POST
 }
 
 // Query for GENRE in AND or OR mode with at least one genre
-if(isset($_POST['genre']) && strlen($query) == 0) {
+if(strlen($query) == 0 && isset($_POST['genre'])) {
 	// Genre in and mode
 	if(isset($_POST['genre_and']) && $_POST['genre_and'] == 'true') {
 		$having = " HAVING COUNT(videometadata.title) = " . sizeof($_POST['genre']);
@@ -137,7 +157,7 @@ if(isset($_POST['genre']) && strlen($query) == 0) {
 }
 
 // Query without genre
-if(!isset($_POST['genre']) && strlen($query) == 0 ) {
+if(strlen($query) == 0 && !isset($_POST['genre']) ) {
 	$conditions = array();
 	if(isset($_POST['watched'])) {
 		if($_POST['watched'] == "1") array_push($conditions," videometadata.watched = FALSE ");
@@ -158,6 +178,17 @@ if(!isset($_POST['genre']) && strlen($query) == 0 ) {
 
 $debug .= "<br>".$query . $limit;
 //trigger_error ($query,E_USER_NOTICE);
+
+if(strlen($query) == 0) {
+	$response_array['error']=true;
+	$response_array['count'] = 0;
+	$response_array['out'] = "";
+	$response_array['debug']=$debug;							
+	$response_array['message'] = "Selezione non prevista";	
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;	
+}
 
 $cnt=0;
 $totalmovies = 0;

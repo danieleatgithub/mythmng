@@ -19,7 +19,7 @@ function disableAllTabs() {
 }
 
 function buildViewMovieRecord(id,movie,cast,genre) {
-	console.log(genre);
+	console.log(movie);
 	var obj=$("#movie-t").clone(true,true).attr('id', 'movie-'+ id).insertAfter("#movie-t");
 	var thumb = movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
 	var txt = "";	
@@ -56,14 +56,15 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 function buildEditMovieRecord(id,movie,cast,genre) {
 	console.log("buildEditMovieRecord "+id);
 	var obj=$("#movieedit-t").clone(true,true).attr('id', 'movieedit-'+ id).insertAfter("#movieedit-t");
-	var thumb = movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
+	var thumb 	= movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
+	var videoid	= movie['intid'];
 	var txt = "";	
 	var txtcast = "";
 	var txtgenre = "";
 	var txtdebug = "";
 	if(debug) {
 		txtdebug = " (";
-		txtdebug+= ' id:'+movie['intid'];
+		txtdebug+= ' id:'+ videoid;
 		txtdebug+= ' File:'+movie['filename']
 		txtdebug = ")";
 	}
@@ -79,7 +80,9 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 		if(genre.indexOf(genre_strings[i]['genre']) > -1) {
 			type = "btn-warning";
 		}
-		text = '<button type="button" class="btn btn_edit_genre '+type+'" intid="'+genre_strings[i]['intid']+'"">';
+		text = '<button type="button" class="btn btn_edit_genre '+type+'" ';
+		text += 'videoid="'+movie['intid']+'" ';
+		text += 'genreid="'+genre_strings[i]['intid']+'"">';
 		text += genre_strings[i]['genre'];
 		text += '</button>';
 		divgen.append(text);
@@ -87,12 +90,12 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	divgen.append('</center>');
 	// view btn_edit_genre detail
 	$('.btn_edit_genre').on('click', edit_genre);
-
-
 	
 	obj.attr('index',id);
 	obj.find('#ideok').attr('index',id);
 	obj.find('#ideabort').attr('index',id);
+	obj.find('#ideok').attr('videoid',videoid);
+	obj.find('#ideabort').attr('videoid',videoid);
 	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
 	obj.find('#idtitle').val(movie['title']);
 	obj.find('#iddirector').val(movie['director']);
@@ -106,8 +109,13 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 
 
 function edit_genre() {
-	console.log(this);
+	// console.log(this);
+	var genreid=$(this).attr('genreid');
+	var videoid=$(this).attr('videoid');
 	var newvalue=true;
+	// console.log(genreid);
+	// console.log(videoid);
+	
 	if($(this).hasClass("btn-warning")) {
 		newvalue=false;
 		$(this).removeClass("btn-warning");
@@ -118,8 +126,68 @@ function edit_genre() {
 		$(this).addClass("btn-warning");
 		
 	}
-	
+	$.ajax({ 
+	type: "POST",
+	url: "/mythmng/mythmngBE.php", 
+	dataType: "json", 
+	data: { 
+			request: "set_genre",
+			state: 	 newvalue, 
+			videoid: videoid,
+			genreid: genreid
+			},
+	success: function( response ) {
+		var text = "";
+		if(debug) $('#divdeb').html(getInfo(response.debug));
+		if(response.error) {
+			$('#divmsg').html(getAlert(response.message));	
+			return;
+		}			
+	},
+	error: function( request, error ) {
+		if(debug) $('#divdeb').html(getInfo(response.debug));
+		$('#divmsg').html(getAlert(error));			
+	}
+});
+
 }
+
+function refresh_video(container,videoid,index) {
+		var videos = [];
+		videos.push(videoid);
+		
+		$.ajax({ 
+		type: "POST",
+		url: "/mythmng/viewBE.php", 
+		dataType: "json", 
+		data: {
+				videoid:		videos
+				},
+		success: function( response ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(!response.error) {
+				var rx = JSON.parse(response.out);
+				records[index] = rx[0];
+				movie = records[index]['movie'];
+				cast  = records[index]['cast'];
+				genre = records[index]['genre'];
+				var obj = buildViewMovieRecord(index,movie,cast,genre);
+				container.append(obj);
+			} else {
+				$('#divmsg').html(getAlert(response.message));
+				console.log("refresh_video "+page+" response error");
+			}			
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+			console.log("refresh_video "+page+" error");
+		}
+    });
+
+}
+
+
 // class viewbtn
 function view_page(page) {
    var ordered 		= $('#ordered').val();
@@ -127,6 +195,7 @@ function view_page(page) {
    var title 		= $('#title_in').val();
    var watched		= $('#watched').val();
    var genre 		= [];
+   var videoid		= [];
    var count 		= 0;
    $.each($('.genre'), function( index, value ) {
 	if($(value).hasClass("active")) {
@@ -139,15 +208,16 @@ function view_page(page) {
 		type: "POST",
 		url: "/mythmng/viewBE.php", 
 		dataType: "json", 
-		data: { 
-				genre:genre, 
-				genre_and: genre_and,
-				watched: watched,
-				title: title,
-				page: page,
-				movies4page: movies4page,
-				descending: descending,
-				ordered: ordered
+		data: {
+				videoid:		videoid,
+				genre:			genre, 
+				genre_and: 		genre_and,
+				watched: 		watched,
+				title: 			title,
+				page: 			page,
+				movies4page: 	movies4page,
+				descending: 	descending,
+				ordered: 		ordered
 				},
 		success: function( response ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));

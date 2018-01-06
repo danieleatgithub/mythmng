@@ -100,6 +100,44 @@ if($_POST['request'] == "get_info") {
 	
 }
 
+if($_POST['request'] == "set_genre") {
+	if(!isset($_POST['state']) || !isset($_POST['videoid']) || !isset($_POST['genreid'])) {
+		$response_array['message'] = "set_genre missing parameters";	
+		header('Content-type: application/json');
+		echo json_encode($response_array);		
+		exit(); 	
+	}
+	
+	if($_POST['state'] == "true") {
+		$query = "INSERT INTO `mythconverg`.`videometadatagenre` (`idvideo`, `idgenre`) VALUES (".$_POST['videoid'].", ".$_POST['genreid'].")";
+	} else {
+		$query = "DELETE FROM `mythconverg`.`videometadatagenre` WHERE  `idvideo`=".$_POST['videoid']." AND `idgenre`=".$_POST['genreid'];		
+	}
+	$response_array['debug'] 	= $query;
+	
+	if(!($res = $mysqli->query($query))) {
+		$response_array['message']  = $mysqli->error;	
+		header('Content-type: application/json');
+		echo json_encode($response_array);	
+		exit;
+	}
+	$response_array['count'] = $mysqli->affected_rows;
+	
+	if($response_array['count'] != 1){
+		$response_array['message']  = "Modificati ".$response_array['count']." generi";	
+		header('Content-type: application/json');
+		echo json_encode($response_array);	
+		exit;
+	}
+		
+	$response_array['error']	= false;
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
+	
+}
+
+
 if($_POST['request'] == "video_play") {
 	$storage = array();
 	$rout = array();
