@@ -31,6 +31,7 @@ if ($mysqli->connect_errno) {
 	echo json_encode($response_array);		
 	exit(); 
 }
+$mysqli->set_charset("utf8");
 
 $query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';";
 if(!$mysqli->query($query)) {
@@ -44,6 +45,7 @@ if(!$mysqli->query($query)) {
 	exit(); 
 	
 }
+
 
 $query = "";
 $where = "";
@@ -119,11 +121,17 @@ if(strlen($query) == 0 && isset($_POST['genre_and']) && $_POST['genre_and'] == '
 		if($_POST['watched'] == "1") $where = " AND videometadata.watched = FALSE ";
 		if($_POST['watched'] == "2") $where = " AND videometadata.watched = TRUE ";
 	}
+	if(isset($_POST['year_from']) && isset($_POST['year_to']) && $_POST['year_from'] > 0 && $_POST['year_to'] > 0) {
+		$where .= " AND ";
+		$where .= " videometadata.year >= ".intval($_POST['year_from'])." AND videometadata.year <= ".intval($_POST['year_to']);
+	}
+	$where .= " GROUP BY videometadata.intid ";
 	
 	$query = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
 		"videometadata ".
 		" LEFT JOIN videometadatagenre ON ". 
 		"videometadatagenre.idvideo = videometadata.intid where videometadatagenre.idvideo is null ".
+		" or videometadata.plot = 'None' ".
 		$where.
 		$order;
 }
@@ -138,6 +146,10 @@ if(strlen($query) == 0 && isset($_POST['genre'])) {
 		if($_POST['watched'] == "1") $where = " AND videometadata.watched = FALSE ";
 		if($_POST['watched'] == "2") $where = " AND videometadata.watched = TRUE ";
 	}
+	if(isset($_POST['year_from']) && isset($_POST['year_to']) && $_POST['year_from'] > 0 && $_POST['year_to'] > 0) {
+		$where .= " AND ";
+		$where .= " videometadata.year >= ".intval($_POST['year_from'])." AND videometadata.year <= ".intval($_POST['year_to']);
+	}
 	$where .= " AND ( ";
 	$sep = "";
 	foreach($_POST['genre'] as $gen) {
@@ -146,7 +158,7 @@ if(strlen($query) == 0 && isset($_POST['genre'])) {
 	}
 	$where .= ") ";
 	if(strlen($title)) $where .= " AND videometadata.title LIKE '%".$title."%' ";
-	$where .= " GROUP BY videometadata.title ";
+	$where .= " GROUP BY videometadata.intid ";
 	$query = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
 		"videometadata ".
 		" JOIN videometadatagenre ON ". 
@@ -162,6 +174,9 @@ if(strlen($query) == 0 && !isset($_POST['genre']) ) {
 	if(isset($_POST['watched'])) {
 		if($_POST['watched'] == "1") array_push($conditions," videometadata.watched = FALSE ");
 		if($_POST['watched'] == "2") array_push($conditions," videometadata.watched = TRUE ");
+	}
+	if(isset($_POST['year_from']) && isset($_POST['year_to']) && $_POST['year_from'] > 0 && $_POST['year_to'] > 0) {
+		array_push($conditions," videometadata.year >= ".intval($_POST['year_from'])." AND videometadata.year <= ".intval($_POST['year_to']));
 	}
 	if(strlen($title)) array_push($conditions," videometadata.title LIKE '%".$title."%' ");	
 	if(!empty($conditions)) {
@@ -211,13 +226,21 @@ if($res = $mysqli->query($query)) {
 if($res = $mysqli->query($query. $limit)) {
 	
 	while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-		//trigger_error ($row['plot'],E_USER_NOTICE);
-		$row['title'] 		= htmlentities(utf8_encode($row['title']), 0, "UTF-8");
-		$row['plot']  		= htmlentities(utf8_encode(trim($row['plot'])), 0, "UTF-8");
-		$row['director']  	= htmlentities(utf8_encode($row['director']), 0, "UTF-8");
-		$row['subtitle']  	= htmlentities(utf8_encode($row['subtitle']), 0, "UTF-8");
-		$row['tagline']  	= htmlentities(utf8_encode($row['tagline']), 0, "UTF-8");
-		$row['studio']  	= htmlentities(utf8_encode($row['studio']), 0, "UTF-8");
+		// trigger_error ($row['plot'],E_USER_NOTICE);
+		
+		// replace ’ character with '
+		$row['plot'] = preg_replace('/’/',"'",$row['plot']);
+		$row['title'] = preg_replace('/’/',"'",$row['title']);
+		$row['director'] = preg_replace('/’/',"'",$row['director']);
+		$row['studio'] = preg_replace('/’/',"'",$row['studio']);
+
+		
+		$row['title'] 		= htmlentities($row['title']);
+		$row['plot']  		= htmlentities(trim($row['plot']));
+		$row['director']  	= htmlentities($row['director']);
+		$row['subtitle']  	= htmlentities($row['subtitle']);
+		$row['tagline']  	= htmlentities($row['tagline']);
+		$row['studio']  	= htmlentities($row['studio']);
 		array_push($movie,$row);
 		$cover = pathinfo($row['coverfile']);
 		$thumbfile = $_fs['thumbnail'].$cover['filename'].'.jpg';
@@ -236,14 +259,16 @@ if($res = $mysqli->query($query. $limit)) {
 		//trigger_error ($query,E_USER_NOTICE);
 		if($res = $mysqli->query($query)) {
 			while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-				$row['cast'] 		= htmlentities(utf8_encode($row['cast']), 0, "UTF-8");
+				$row['cast'] = preg_replace('/’/',"'",$row['cast']);
+				$row['cast'] 		= htmlentities($row['cast']);
 				array_push($cast,$row['cast']);
 			}
 		}
 		$query = "select distinct videogenre.genre from videogenre join videometadatagenre on videogenre.intid = videometadatagenre.idgenre where videometadatagenre.idvideo = ".$m['intid'];
 		if($res = $mysqli->query($query)) {
 			while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-				$row['genre'] 		= htmlentities(utf8_encode($row['genre']), 0, "UTF-8");
+				$row['genre'] = preg_replace('/’/',"'",$row['genre']);
+				$row['genre'] 		= htmlentities($row['genre']);
 				array_push($genre,$row['genre']);
 			}
 		}

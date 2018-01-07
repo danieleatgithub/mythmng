@@ -4,16 +4,18 @@
 $('#reset').on('click', function() {
   $('#result-'+$(this).data('target')).addClass('hide');
   $('#freetxt').val("");
-  $('#movies4page').val("20");
+  $('#movies4page').selectpicker('val', '20');
+  $('#ordered').selectpicker('val', '0');
+  $('#watched').selectpicker('val', '0');
   $('#title_in').val("");
+  $('#year_from').val("");
+  $('#year_to').val("");
   $('#divmsg').empty();
   $('#divout').empty();
   $('#divdeb').empty();
-  $('#genre_and').html('OR mode');
+  $('#genre_and').html('Almeno un genere');
   $('#dbug').html('Debug OFF');
   $('#ascdesc').html('Decrescente');
-  $('#ordered').val("0");
-  $('#watched').val("0");
   debug 		= false;
   descending 	= false;
   genre_and 	= false;
@@ -31,15 +33,16 @@ $('#page-selection').bootpag({total: 1, maxVisible: 0 });
 
 // Hide div from target
 $('.divhide').on('click', function() {
-  var hidetab = $('.'+$(this).attr('target'));
-  if($(hidetab).is(':visible')) {
-	  $('.maintabhide').removeClass("glyphicon-triangle-bottom");
-	  $('.maintabhide').addClass("glyphicon-triangle-top");
-	  $(hidetab).hide();
+	var parentdiv=$(this).parent();
+	var targetdiv = parentdiv.find('#'+$(this).attr('targetdiv'))
+  if(targetdiv.is(':visible')) {
+	  $(this).addClass("glyphicon-triangle-top");
+	  $(this).removeClass("glyphicon-triangle-bottom");
+	  targetdiv.hide();
   } else {
-	  $('.maintabhide').removeClass("glyphicon-triangle-top");
-	  $('.maintabhide').addClass("glyphicon-triangle-bottom");
-	  $(hidetab).show();
+	  $(this).addClass("glyphicon-triangle-bottom");
+	  $(this).removeClass("glyphicon-triangle-top");
+	  targetdiv.show();
   }
 });
 
@@ -49,6 +52,15 @@ $('.moviezoom').on('click', function() {
 	console.log("editabort "+index);
  });
  
+// editbox 
+$('.editbox').on('change', function() {
+	var index = $(this).attr('index');
+	var editdiv = $("#movie-"+index).find("#edit")
+	console.log("editbox:"+index);
+	$(this).css("background-color","yellow");
+	editdiv.removeClass("editmodified")
+	editdiv.addClass("editmodified")
+});
  
 // editabort 
 $('.editabort').on('click', function() {
@@ -62,6 +74,49 @@ $('.editabort').on('click', function() {
  // editok 
 $('.editok').on('click', function() {
 	var index = $(this).attr('index');
+	var videoid = $(this).attr('videoid');
+	var moviecontainer = $("#movie-"+index).find("#edit").parent();
+	var editdiv = $("#movie-"+index).find("#edit")
+	var year 	= editdiv.find("#idyear").val();
+	var title 	= editdiv.find("#idtitle").val();
+	var plot 	= editdiv.find("#idplot").val();
+	
+	console.log("editok");
+
+	if(editdiv.hasClass("editmodified")) {
+		console.log("id:"+index+" year:"+year+" title:"+title);
+		console.log("plot:"+plot);
+			$.ajax({ 
+				type: "POST",
+				url: "/mythmng/mythmngBE.php", 
+				dataType: "json", 
+				data: { 
+						request: "set_data",
+						videoid: videoid,
+						year: year,
+						title: title,
+						plot: plot
+						},
+				success: function( response ) {
+					var text = "";
+					if(debug) $('#divdeb').html(getInfo(response.debug));
+					if(response.error) {
+						$('#divmsg').html(getAlert(response.message));	
+						return;
+					}			
+					moviecontainer.empty();	
+					refresh_video(moviecontainer,videoid,index)
+				},
+				error: function( request, error ) {
+					if(debug) $('#divdeb').html(getInfo(response.debug));
+					$('#divmsg').html(getAlert(error));			
+				}
+			});
+
+	} else {
+		refresh_video(moviecontainer,videoid,index)
+	}
+
 	console.log("editok "+index);
  });
  
@@ -133,9 +188,9 @@ $('.movieplay').on('click', function() {
 $('#genre_and').on('click', function() {
   genre_and = !genre_and;
   if(genre_and == true) {
-	$('#genre_and').html('AND mode');
+	$('#genre_and').html('Tutti i generi');
   } else {
-	$('#genre_and').html('OR mode'); 
+	$('#genre_and').html('Almeno un genere'); 
   }
 });
 

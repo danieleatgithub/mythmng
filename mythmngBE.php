@@ -22,6 +22,7 @@ require_once(dirname(__FILE__) . "/globals.php");
 
 
 if(!isset($_POST['request'])) {
+	trigger_error (print_R($_POST,true),E_USER_NOTICE);
 	$response_array['message'] = "Request not set";	
 	header('Content-type: application/json');
 	echo json_encode($response_array);		
@@ -38,6 +39,7 @@ if ($mysqli->connect_errno) {
 
 $query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';";
 if(!$mysqli->query($query)) {
+	trigger_error (print_R($_POST,true),E_USER_NOTICE);
 	$response_array['debug']=$query;							
 	$response_array['message'] = $mysqli->error;	
 	header('Content-type: application/json');
@@ -48,6 +50,7 @@ if(!$mysqli->query($query)) {
 
 if($_POST['request'] == "get_genre") {
 	$query = "SELECT * FROM videogenre ORDER by genre";
+	$mysqli->set_charset("utf8");
 	$cnt=0;
 	if($res = $mysqli->query($query)) {
 		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
@@ -68,6 +71,34 @@ if($_POST['request'] == "get_genre") {
 		exit;
 	}
 }
+
+if($_POST['request'] == "get_director") {
+	$query = "select director, count(*) as counter from videometadata group by director";
+	$mysqli->set_charset("utf8");
+	
+	if($res = $mysqli->query($query)) {
+		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+			$row['director'] = preg_replace('/’/',"'",$row['director']);		
+			$row['director'] = htmlentities($row['director']);
+			array_push($rout,$row);
+		}
+		$response_array['error']	= false;
+		$response_array['count'] 	= $res->num_rows;
+		$response_array['out'] 		= json_encode($rout);
+		$response_array['message'] 	= "Found ".$cnt." genre";	
+		header('Content-type: application/json');
+		echo json_encode($response_array);	
+		exit;
+	} else {
+		$response_array['message'] = $mysqli->error;	
+		header('Content-type: application/json');
+		echo json_encode($response_array);	
+		exit;
+	}
+}
+
+
+
 
 if($_POST['request'] == "get_info") {
 	$query = "SELECT COUNT(*) as total FROM videometadata";
@@ -99,6 +130,50 @@ if($_POST['request'] == "get_info") {
 	exit;
 	
 }
+
+
+if($_POST['request'] == "set_data") {
+	if(!isset($_POST['videoid']) || !isset($_POST['year']) || !isset($_POST['title']) || !isset($_POST['plot'])  ) {
+		$response_array['message'] = "set_data missing parameters";	
+		header('Content-type: application/json');
+		echo json_encode($response_array);		
+		exit(); 	
+	}
+	$mysqli->set_charset("utf8");
+	$title = $mysqli->real_escape_string($_POST['title']);
+	$plot = $mysqli->real_escape_string($_POST['plot']);
+	// trigger_error ($title,E_USER_NOTICE);
+	
+	$query = "UPDATE `mythconverg`.`videometadata` SET ";
+	$query .= " `year`=".intval($_POST['year']);
+	$query .= ", `title`='".$title."'";
+	$query .= ", `plot`='".$plot."'";
+	$query .= " WHERE  `intid`=".intval($_POST['videoid']);
+	$response_array['debug'] 	= $query;
+	
+	if(!($res = $mysqli->query($query))) {
+		trigger_error($mysqli->error,E_USER_NOTICE);
+		$response_array['message']  = $mysqli->error;	
+		header('Content-type: application/json');
+		echo json_encode($response_array);	
+		exit;
+	}
+	$response_array['count'] = $mysqli->affected_rows;
+	
+	if($response_array['count'] != 1){
+		$response_array['message']  = "Modificati ".$response_array['count']." generi";	
+		header('Content-type: application/json');
+		echo json_encode($response_array);	
+		exit;
+	}
+		
+	$response_array['error']	= false;
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
+	
+}
+
 
 if($_POST['request'] == "set_genre") {
 	if(!isset($_POST['state']) || !isset($_POST['videoid']) || !isset($_POST['genreid'])) {

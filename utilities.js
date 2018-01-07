@@ -90,19 +90,34 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	divgen.append('</center>');
 	// view btn_edit_genre detail
 	$('.btn_edit_genre').on('click', edit_genre);
+	var ideok		= obj.find('#ideok');
+	var ideabort	= obj.find('#ideabort');
+	var idplot	= obj.find('#idplot');
+	var idtitle	= obj.find('#idtitle');
+	var iddirector	= obj.find('#iddirector');
+	var idyear	= obj.find('#idyear');
 	
 	obj.attr('index',id);
-	obj.find('#ideok').attr('index',id);
-	obj.find('#ideabort').attr('index',id);
-	obj.find('#ideok').attr('videoid',videoid);
-	obj.find('#ideabort').attr('videoid',videoid);
-	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
-	obj.find('#idtitle').val(movie['title']);
-	obj.find('#iddirector').val(movie['director']);
-	obj.find('#idyear').val(movie['year']);
+	ideok.attr('index',id);
+	ideok.attr('videoid',videoid);
+	ideabort.attr('index',id);
+	ideabort.attr('videoid',videoid);
+
+	idtitle.val($("<textarea/>").html(movie['title']).text());
+	idtitle.attr('index',id);
+	
+	iddirector.val(movie['director']);
+	iddirector.attr('index',id);
+	
+	idyear.val(movie['year']);
+	idyear.attr('index',id);
+	
+	idplot.html(movie['plot']);
+	idplot.attr('index',id);
+	
 	obj.find('#idcast').html(txtcast);
 	obj.find('#iddebug').html(txtdebug);
-	obj.find('#idplot').html(movie['plot']);
+	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
 	obj.show();
 	return(obj);
 }
@@ -193,6 +208,8 @@ function view_page(page) {
    var ordered 		= $('#ordered').val();
    var movies4page 	= $('#movies4page').val();
    var title 		= $('#title_in').val();
+   var year_from 	= $('#year_from').val();
+   var year_to 		= $('#year_to').val();
    var watched		= $('#watched').val();
    var genre 		= [];
    var videoid		= [];
@@ -214,6 +231,8 @@ function view_page(page) {
 				genre_and: 		genre_and,
 				watched: 		watched,
 				title: 			title,
+				year_from:		year_from,
+				year_to:		year_to,
 				page: 			page,
 				movies4page: 	movies4page,
 				descending: 	descending,
@@ -245,8 +264,8 @@ function view_page(page) {
 		},
 		error: function( request, error ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
-			$('#divmsg').html(getAlert(error));			
-			$('#page-selection').bootpag({total: 0 });
+			// $('#divmsg').html(getAlert(error));			
+			// $('#page-selection').bootpag({total: 0 });
 			console.log("view_page "+page+" error");
 		}
     });

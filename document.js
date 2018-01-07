@@ -9,7 +9,7 @@ $(document).ready(function() {
 	var genre = [];
 	$.ajax({ 
 		type: "POST",
-		url: "/mythmng/mythmngBE.php", 
+		url: "/mythmng/mythmngBE.php",
 		dataType: "json", 
 		data: { 
 				request: "get_genre" 
@@ -45,9 +45,39 @@ $(document).ready(function() {
     });
 	$.ajax({ 
 		type: "POST",
-		url: "/mythmng/mythmngBE.php", 
+		url: "/mythmng/mythmngBE.php",
 		dataType: "json", 
 		data: { 
+				request: "get_director" 
+				},
+		success: function( response ) {
+			var count  = response.count;
+			var text = "";
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}			
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			var directors = JSON.parse(response.out);
+			$('#director').append("<option>--------</option>");
+			$('#director').append("<option>Unknown</option>");
+			for(i=0;i<count;i++) {
+				$('#director').append("<option>"+directors[i]['director']+" ("+directors[i]['counter']+")</option>");
+			}
+			$('#director').selectpicker('refresh');
+			console.log(directors);
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+    });
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/mythmngBE.php", 
+		dataType: "json", 
+		data: {
 				request: "get_info" 
 				},
 		success: function( response ) {

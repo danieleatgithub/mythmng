@@ -50,10 +50,6 @@
 	box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3); 
 	margin-bottom: 30px; 
 }
-body{ 
-	background: #EDECEC; 
-	padding:10px
-}
 
 .row.row-align-bottom > div {
     float: none;
