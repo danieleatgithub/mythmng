@@ -133,7 +133,7 @@ if($_POST['request'] == "get_info") {
 
 
 if($_POST['request'] == "set_data") {
-	if(!isset($_POST['videoid']) || !isset($_POST['year']) || !isset($_POST['title']) || !isset($_POST['plot'])  ) {
+	if(!isset($_POST['videoid']) || !isset($_POST['year']) || !isset($_POST['title']) || !isset($_POST['plot']) || !isset($_POST['director']) ) {
 		$response_array['message'] = "set_data missing parameters";	
 		header('Content-type: application/json');
 		echo json_encode($response_array);		
@@ -142,12 +142,15 @@ if($_POST['request'] == "set_data") {
 	$mysqli->set_charset("utf8");
 	$title = $mysqli->real_escape_string($_POST['title']);
 	$plot = $mysqli->real_escape_string($_POST['plot']);
+	$director = $mysqli->real_escape_string($_POST['director']);
+	
 	// trigger_error ($title,E_USER_NOTICE);
 	
 	$query = "UPDATE `mythconverg`.`videometadata` SET ";
 	$query .= " `year`=".intval($_POST['year']);
 	$query .= ", `title`='".$title."'";
 	$query .= ", `plot`='".$plot."'";
+	$query .= ", `director`='".$director."'";
 	$query .= " WHERE  `intid`=".intval($_POST['videoid']);
 	$response_array['debug'] 	= $query;
 	
@@ -161,7 +164,7 @@ if($_POST['request'] == "set_data") {
 	$response_array['count'] = $mysqli->affected_rows;
 	
 	if($response_array['count'] != 1){
-		$response_array['message']  = "Modificati ".$response_array['count']." generi";	
+		$response_array['message']  = "Modificati ".$response_array['count']." record";	
 		header('Content-type: application/json');
 		echo json_encode($response_array);	
 		exit;

@@ -7,6 +7,7 @@ $('#reset').on('click', function() {
   $('#movies4page').selectpicker('val', '20');
   $('#ordered').selectpicker('val', '0');
   $('#watched').selectpicker('val', '0');
+  $('#director').selectpicker('val', '');
   $('#title_in').val("");
   $('#year_from').val("");
   $('#year_to').val("");
@@ -58,8 +59,7 @@ $('.editbox').on('change', function() {
 	var editdiv = $("#movie-"+index).find("#edit")
 	console.log("editbox:"+index);
 	$(this).css("background-color","yellow");
-	editdiv.removeClass("editmodified")
-	editdiv.addClass("editmodified")
+	editdiv.find('#ideok').show();
 });
  
 // editabort 
@@ -80,44 +80,41 @@ $('.editok').on('click', function() {
 	var year 	= editdiv.find("#idyear").val();
 	var title 	= editdiv.find("#idtitle").val();
 	var plot 	= editdiv.find("#idplot").val();
+	var director = editdiv.find("#eddirector").val();
+
+	// console.log("editok"+director);
+	// console.log("id:"+index+" year:"+year+" title:"+title);
+	// console.log("plot:"+plot);
 	
-	console.log("editok");
-
-	if(editdiv.hasClass("editmodified")) {
-		console.log("id:"+index+" year:"+year+" title:"+title);
-		console.log("plot:"+plot);
-			$.ajax({ 
-				type: "POST",
-				url: "/mythmng/mythmngBE.php", 
-				dataType: "json", 
-				data: { 
-						request: "set_data",
-						videoid: videoid,
-						year: year,
-						title: title,
-						plot: plot
-						},
-				success: function( response ) {
-					var text = "";
-					if(debug) $('#divdeb').html(getInfo(response.debug));
-					if(response.error) {
-						$('#divmsg').html(getAlert(response.message));	
-						return;
-					}			
-					moviecontainer.empty();	
-					refresh_video(moviecontainer,videoid,index)
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/mythmngBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "set_data",
+				videoid: videoid,
+				year: year,
+				title: title,
+				director: director,
+				plot: plot
 				},
-				error: function( request, error ) {
-					if(debug) $('#divdeb').html(getInfo(response.debug));
-					$('#divmsg').html(getAlert(error));			
-				}
-			});
+		success: function( response ) {
+			var text = "";
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(response.error) {
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}			
+			moviecontainer.empty();	
+			refresh_video(moviecontainer,videoid,index)
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
 
-	} else {
-		refresh_video(moviecontainer,videoid,index)
-	}
-
-	console.log("editok "+index);
+	// console.log("editok "+index);
  });
  
  $('#ordered').on('change', function() {
@@ -130,19 +127,17 @@ $('.editok').on('click', function() {
 // open editable div
 $('.movieedit').on('click', function() { 
 	var index = $(this).attr('index');
-	console.log("movieedit "+index);
-	console.log(records[index]);
+	// console.log("movieedit "+index);
+	// console.log(records[index]);
 	var movie = records[index]['movie'];
 	var cast  = records[index]['cast'];
 	var genre = records[index]['genre'];
 	var obj = buildEditMovieRecord(index,movie,cast,genre);
-	console.log($("#movie-"+index).find("#edit"));
+	// console.log($("#movie-"+index).find("#edit"));
 	obj.show();
 	$("#movie-"+index).find("#edit").show();	
 	$("#movie-"+index).find("#edit").html(obj);	
 	$("#movie-"+index).find("#view").hide();
-	plot = obj.find("#idplot")
-	plot.height( plot[0].scrollHeight );
 
  });
  

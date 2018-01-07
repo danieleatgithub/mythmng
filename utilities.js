@@ -19,7 +19,7 @@ function disableAllTabs() {
 }
 
 function buildViewMovieRecord(id,movie,cast,genre) {
-	console.log(movie);
+	// console.log(movie);
 	var obj=$("#movie-t").clone(true,true).attr('id', 'movie-'+ id).insertAfter("#movie-t");
 	var thumb = movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
 	var txt = "";	
@@ -54,7 +54,7 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 
 
 function buildEditMovieRecord(id,movie,cast,genre) {
-	console.log("buildEditMovieRecord "+id);
+	// console.log("buildEditMovieRecord "+id);
 	var obj=$("#movieedit-t").clone(true,true).attr('id', 'movieedit-'+ id).insertAfter("#movieedit-t");
 	var thumb 	= movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
 	var videoid	= movie['intid'];
@@ -94,7 +94,7 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	var ideabort	= obj.find('#ideabort');
 	var idplot	= obj.find('#idplot');
 	var idtitle	= obj.find('#idtitle');
-	var iddirector	= obj.find('#iddirector');
+	var eddirector	= obj.find('#eddirector');
 	var idyear	= obj.find('#idyear');
 	
 	obj.attr('index',id);
@@ -105,9 +105,9 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 
 	idtitle.val($("<textarea/>").html(movie['title']).text());
 	idtitle.attr('index',id);
-	
-	iddirector.val(movie['director']);
-	iddirector.attr('index',id);
+		
+	eddirector.attr('index',id);
+	eddirector.html($('#director').html());
 	
 	idyear.val(movie['year']);
 	idyear.attr('index',id);
@@ -119,6 +119,10 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	obj.find('#iddebug').html(txtdebug);
 	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
 	obj.show();
+	idplot.height( idplot[0].scrollHeight );
+	eddirector.addClass("selectpicker");
+	eddirector.selectpicker('val',movie['director']);
+	eddirector.selectpicker('refresh');
 	return(obj);
 }
 
@@ -211,6 +215,7 @@ function view_page(page) {
    var year_from 	= $('#year_from').val();
    var year_to 		= $('#year_to').val();
    var watched		= $('#watched').val();
+   var director		= $('#director').val();
    var genre 		= [];
    var videoid		= [];
    var count 		= 0;
@@ -220,7 +225,7 @@ function view_page(page) {
 	}	
 	});
 	$('#divout').empty();
-
+	// console.log(director);
 	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/viewBE.php", 
@@ -231,6 +236,7 @@ function view_page(page) {
 				genre_and: 		genre_and,
 				watched: 		watched,
 				title: 			title,
+				director: 		director,
 				year_from:		year_from,
 				year_to:		year_to,
 				page: 			page,

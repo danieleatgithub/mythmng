@@ -60,13 +60,12 @@ $(document).ready(function() {
 			}			
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			var directors = JSON.parse(response.out);
-			$('#director').append("<option>--------</option>");
-			$('#director').append("<option>Unknown</option>");
+			$('#director').append("<option></option>");
 			for(i=0;i<count;i++) {
-				$('#director').append("<option>"+directors[i]['director']+" ("+directors[i]['counter']+")</option>");
+				$('#director').append("<option value='"+directors[i]['director']+"'>"+directors[i]['director']+"</option>");
 			}
 			$('#director').selectpicker('refresh');
-			console.log(directors);
+			// console.log(directors);
 		},
 		error: function( request, error ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
