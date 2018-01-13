@@ -5,8 +5,10 @@ var info 	= [];
 var records = [];
 var genre_strings = [];
 
+
 $(document).ready(function() {
 	var genre = [];
+
 	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/mythmngBE.php",

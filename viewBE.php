@@ -59,6 +59,7 @@ $videoid = array();
 $movies4page = 20;
 $title = "";
 $director = "";
+$plot = "";
 $limit = "";
 $ordermode = "ASC";
 
@@ -97,8 +98,9 @@ if(isset($_POST['ordered'])) {
 	}  
 }
 
-if(isset($_POST['title'])) $title = $_POST['title'];
-if(isset($_POST['director'])) $director = $_POST['director'];
+if(isset($_POST['title'])) 		$title 		= $_POST['title'];
+if(isset($_POST['director'])) 	$director 	= $_POST['director'];
+if(isset($_POST['plot'])) 		$plot 		= $_POST['plot'];
 
 
 // Query with single video list 
@@ -160,6 +162,7 @@ if(strlen($query) == 0 && isset($_POST['genre'])) {
 	$where .= ") ";
 	if(strlen($title)) $where .= " AND videometadata.title LIKE '%".$title."%' ";
 	if(strlen($director)) $where .= " AND videometadata.director LIKE '%".$director."%' ";
+	if(strlen($plot)) $where .= " AND videometadata.plot LIKE '%".$plot."%' ";
 	$where .= " GROUP BY videometadata.intid ";
 	$query = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
 		"videometadata ".
@@ -182,6 +185,7 @@ if(strlen($query) == 0 && !isset($_POST['genre']) ) {
 	}
 	if(strlen($title)) array_push($conditions," videometadata.title LIKE '%".$title."%' ");	
 	if(strlen($director)) array_push($conditions," videometadata.director LIKE '%".$director."%' ");
+	if(strlen($plot)) array_push($conditions," videometadata.plot LIKE '%".$plot."%' ");
 
 	if(!empty($conditions)) {
 		$s = " WHERE ";

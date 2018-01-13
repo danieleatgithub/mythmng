@@ -9,6 +9,7 @@ $('#reset').on('click', function() {
   $('#watched').selectpicker('val', '0');
   $('#director').selectpicker('val', '');
   $('#title_in').val("");
+  $('#plot_in').val("");
   $('#year_from').val("");
   $('#year_to').val("");
   $('#divmsg').empty();
@@ -27,10 +28,31 @@ $('#reset').on('click', function() {
 	  $(value).removeClass("active")
 	}	
   }); 
-
 $('#page-selection').bootpag({total: 1, maxVisible: 0 });
-
 });
+
+$uploadCrop = $('#upload-demo').croppie({
+    enableExif: true,
+    viewport: {
+        width: 200,
+        height: 200,
+        type: 'circle'
+    },
+    boundary: {
+        width: 300,
+        height: 300
+    }
+});
+
+// view movie detail
+$('.editcover').on('click', function() {
+	var index = $(this).attr('index');
+	var editdivbox = $('#movieedit-'+index).find('#editdivbox');
+	editdivbox.hide();
+	console.log("editcover "+index);
+ 	console.log(editdivbox);
+});
+
 
 // Hide div from target
 $('.divhide').on('click', function() {
@@ -86,7 +108,7 @@ $('.editok').on('click', function() {
 	// console.log("id:"+index+" year:"+year+" title:"+title);
 	// console.log("plot:"+plot);
 	
-	$.ajax({ 
+	$.when( $.ajax({ 
 		type: "POST",
 		url: "/mythmng/mythmngBE.php", 
 		dataType: "json", 
@@ -106,13 +128,46 @@ $('.editok').on('click', function() {
 				return;
 			}			
 			moviecontainer.empty();	
-			refresh_video(moviecontainer,videoid,index)
+			refresh_video(moviecontainer,videoid,index);
+			
 		},
 		error: function( request, error ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			$('#divmsg').html(getAlert(error));			
 		}
-	});
+	}) ).then (
+		$.ajax({ 
+			type: "POST",
+			url: "/mythmng/mythmngBE.php",
+			dataType: "json", 
+			data: { 
+					request: "get_director" 
+					},
+			success: function( response ) {
+				var count  = response.count;
+				var text = "";
+				if(response.error) {
+					$('#homeout').html("<pre>"+response.out+"</pre>");
+					$('#divmsg').html(getAlert(response.message));	
+					return;
+				}			
+				if(debug) $('#divdeb').html(getInfo(response.debug));
+				var directors = JSON.parse(response.out);
+				var selected = $('#director').selectpicker('val');
+				$('#director').empty();
+				$('#director').append("<option></option>");
+				for(i=0;i<count;i++) {
+					$('#director').append("<option value='"+directors[i]['director']+"'>"+directors[i]['director']+"</option>");
+				}
+				$('#director').selectpicker('val',selected);
+				$('#director').selectpicker('refresh');
+				// console.log(directors);
+			},
+			error: function( request, error ) {
+				if(debug) $('#divdeb').html(getInfo(response.debug));
+				$('#divmsg').html(getAlert(error));			
+			}
+		}) );
 
 	// console.log("editok "+index);
  });
@@ -147,7 +202,10 @@ $('#page-selection').bootpag({
 				}).on("page", function(event, num){
 			view_page(num);
 });
-	
+
+
+
+
  // play movie on frontend
 $('.movieplay').on('click', function() {
  	var idicons=$(this).parent().parent();
@@ -233,10 +291,29 @@ $('#viewbtn').on('click', function() {
 	view_page(1);
 });
 
+$('#idefanart').on('click', function() {
+	console.log("idefanart click");
+});
 
 
+$('#moddirector').on('hide.bs.modal', function (event) {
+  var button = $(document.activeElement);
+  var modal  = $(this)
+  if (button.is('.save')) {
+	var index = modal.attr('index');	  
+	var newdirector = modal.find('#director-name').val();
+	var eddirector	= $('#movieedit-'+index).find('#eddirector');
 
+	console.log('Index:'+index+' old:'+$(eddirector).selectpicker('val')+' new:'+newdirector);
+	eddirector.append(newdirector);
+	eddirector.append("<option value='"+newdirector+"'>"+newdirector+"</option>");
+	eddirector.selectpicker('refresh');
+	eddirector.selectpicker('val',newdirector);
+	eddirector.selectpicker('refresh');
+	eddirector.trigger('change');
 
+  }
+});
 
 
 

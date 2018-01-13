@@ -49,6 +49,7 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 	obj.find('#idgenre').html(txtgenre);
 	obj.find('#idplot').html(movie['plot']);
 	obj.show();
+	$('span[rel=tooltip]').tooltip();		
 	return(obj);
 }
 
@@ -117,12 +118,19 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	
 	obj.find('#idcast').html(txtcast);
 	obj.find('#iddebug').html(txtdebug);
+	
 	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
+	obj.find('#idcover').attr('index',id);
+
+	obj.find('#adddirector').attr('data-index',id);
+	obj.find('#moddirector').attr('index',id);
+	
 	obj.show();
 	idplot.height( idplot[0].scrollHeight );
 	eddirector.addClass("selectpicker");
 	eddirector.selectpicker('val',movie['director']);
 	eddirector.selectpicker('refresh');
+	$('span[rel=tooltip]').tooltip();		
 	return(obj);
 }
 
@@ -212,6 +220,7 @@ function view_page(page) {
    var ordered 		= $('#ordered').val();
    var movies4page 	= $('#movies4page').val();
    var title 		= $('#title_in').val();
+   var plot 		= $('#plot_in').val();
    var year_from 	= $('#year_from').val();
    var year_to 		= $('#year_to').val();
    var watched		= $('#watched').val();
@@ -236,6 +245,7 @@ function view_page(page) {
 				genre_and: 		genre_and,
 				watched: 		watched,
 				title: 			title,
+				plot:			plot,
 				director: 		director,
 				year_from:		year_from,
 				year_to:		year_to,
