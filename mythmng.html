@@ -205,7 +205,7 @@
 		<div class="form-group" style="margin-top:5px; margin-bottom:5px;">
 			<div class="row" >
 				<div class="col-xs-2 col-md-1">
-					<div class="thumbnail"><img id="idcover" class="thumberror editcover" alt="No image"></div>
+					<div class="thumbnail"><img id="idcover" class="thumberror " alt="No image"></div>
 			
 					<!--div class="demo-wrap upload-demo">
 						<div class="container">
@@ -241,10 +241,10 @@
 						<span id="ideabort" class="glyphicon glyphicon-remove editabort" aria-hidden="true" />
 					</div>
 				<div class="row">
-						<span id="idefanart" class="glyphicon glyphicon-camera editfanart" data-toggle="tooltip" data-placement="right" title="Carica fanart"/>
+						<span id="idefanart" class="glyphicon glyphicon-camera editfanart" data-toggle="modal" data-target="#coverfanart" data-mode="fanart" data-placement="right" title="Carica fanart"/>
 				</div>
 				<div class="row">
-						<span id="idecover" class="glyphicon glyphicon-film editcover" data-toggle="tooltip" data-placement="right" title="Carica cover" />
+						<span id="idecover" class="glyphicon glyphicon-film editcover" data-toggle="modal" data-target="#coverfanart" data-index="" data-coverfile="" data-mode="cover" data-placement="right" title="Carica cover" />
 				</div>
 				</div>
 				<div id="upload-cover" class="croppie-container"></div>
@@ -329,6 +329,30 @@
     </div>
   </div>
 </div>	
+
+
+<!-- modal coverfanart  -->
+<div class="modal fade" id="coverfanart" tabindex="-1" role="dialog" aria-labelledby="moddirectorLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="moddirectorLabel">titolo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        </button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+       <label for="urlinp" class="col-form-label">Url:</label>
+       <input type="text" class="form-control" id="urlinp">
+       <button type="button" class="btn btn-primary"  >Load</button>
+       <button type="button" class="btn btn-primary" data-dismiss="modal" >Cancel</button>
+        <button type="button" class="btn btn-primary save" data-dismiss="modal" >Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <link rel="stylesheet" type="text/css" href="/mythmng/navpanel.css" rel="stylesheet">
 <script type="text/javascript" src="/mythmng/charts/palette.js"></script>

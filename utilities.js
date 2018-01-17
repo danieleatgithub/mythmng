@@ -124,7 +124,13 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 
 	obj.find('#adddirector').attr('data-index',id);
 	obj.find('#moddirector').attr('index',id);
+
+	obj.find('#idefanart').attr('index',id);
 	
+	obj.find('#idecover').attr('data-index',id);
+	obj.find('#idecover').attr('data-coverfile',movie['coverfile']);
+
+
 	obj.show();
 	idplot.height( idplot[0].scrollHeight );
 	eddirector.addClass("selectpicker");
@@ -213,8 +219,6 @@ function refresh_video(container,videoid,index) {
     });
 
 }
-
-
 // class viewbtn
 function view_page(page) {
    var ordered 		= $('#ordered').val();
