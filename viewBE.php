@@ -11,9 +11,8 @@ if(!file_exists(dirname(__FILE__) . "/globals.php")) {
 	exit(); 			
 }
 require_once(dirname(__FILE__) . "/globals.php");
+require_once(dirname(__FILE__) . "/utilities.php");
 
-define('THUMBNAIL_IMAGE_MAX_WIDTH', 100);
-define('THUMBNAIL_IMAGE_MAX_HEIGHT', 150);
 
 $out = "";
 $error = "";
@@ -59,10 +58,10 @@ $videoid = array();
 $movies4page = 20;
 $title = "";
 $director = "";
+$studio = "";
 $plot = "";
 $limit = "";
 $ordermode = "ASC";
-
 
 if(isset($_POST['videoid'])) {
 	$videoid = $_POST['videoid'];
@@ -100,6 +99,7 @@ if(isset($_POST['ordered'])) {
 
 if(isset($_POST['title'])) 		$title 		= $_POST['title'];
 if(isset($_POST['director'])) 	$director 	= $_POST['director'];
+if(isset($_POST['studio'])) 	$studio 	= $_POST['studio'];
 if(isset($_POST['plot'])) 		$plot 		= $_POST['plot'];
 
 
@@ -128,6 +128,15 @@ if(strlen($query) == 0 && isset($_POST['genre_and']) && $_POST['genre_and'] == '
 		$where .= " AND ";
 		$where .= " videometadata.year >= ".intval($_POST['year_from'])." AND videometadata.year <= ".intval($_POST['year_to']);
 	}
+	if(isset($_POST['nocover'])) {
+		if($_POST['nocover'] == "1") $where .= " AND ( videometadata.coverfile is null or videometadata.coverfile = '') ";
+		if($_POST['nocover'] == "2") $where .= " AND ( videometadata.coverfile is not null and videometadata.coverfile != '') ";
+	}
+	if(isset($_POST['nofanart'])) {
+		if($_POST['nofanart'] == "1") $where .= " AND ( videometadata.fanart is null or videometadata.fanart = '') ";
+		if($_POST['nofanart'] == "2") $where .= " AND ( videometadata.fanart is not null and videometadata.fanart != '') ";
+	}	
+	
 	$where .= " GROUP BY videometadata.intid ";
 	
 	$query = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
@@ -153,6 +162,15 @@ if(strlen($query) == 0 && isset($_POST['genre'])) {
 		$where .= " AND ";
 		$where .= " videometadata.year >= ".intval($_POST['year_from'])." AND videometadata.year <= ".intval($_POST['year_to']);
 	}
+	if(isset($_POST['nocover'])) {
+		if($_POST['nocover'] == "1") $where .= " AND ( videometadata.coverfile is null or videometadata.coverfile = '') ";
+		if($_POST['nocover'] == "2") $where .= " AND ( videometadata.coverfile is not null and videometadata.coverfile != '') ";
+	}
+	if(isset($_POST['nofanart'])) {
+		if($_POST['nofanart'] == "1") $where .= " AND ( videometadata.fanart is null or videometadata.fanart = '') ";
+		if($_POST['nofanart'] == "2") $where .= " AND ( videometadata.fanart is not null and videometadata.fanart != '') ";
+	}
+
 	$where .= " AND ( ";
 	$sep = "";
 	foreach($_POST['genre'] as $gen) {
@@ -162,6 +180,7 @@ if(strlen($query) == 0 && isset($_POST['genre'])) {
 	$where .= ") ";
 	if(strlen($title)) $where .= " AND videometadata.title LIKE '%".$title."%' ";
 	if(strlen($director)) $where .= " AND videometadata.director LIKE '%".$director."%' ";
+	if(strlen($studio)) $where .= " AND videometadata.studio LIKE '%".$studio."%' ";
 	if(strlen($plot)) $where .= " AND videometadata.plot LIKE '%".$plot."%' ";
 	$where .= " GROUP BY videometadata.intid ";
 	$query = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
@@ -180,11 +199,20 @@ if(strlen($query) == 0 && !isset($_POST['genre']) ) {
 		if($_POST['watched'] == "1") array_push($conditions," videometadata.watched = FALSE ");
 		if($_POST['watched'] == "2") array_push($conditions," videometadata.watched = TRUE ");
 	}
+	if(isset($_POST['nocover'])) {
+		if($_POST['nocover'] == "1") array_push($conditions, " ( videometadata.coverfile is null or videometadata.coverfile = '') ");
+		if($_POST['nocover'] == "2") array_push($conditions, " ( videometadata.coverfile is not null and videometadata.coverfile != '') ");
+	}
+	if(isset($_POST['nofanart'])) {
+		if($_POST['nofanart'] == "1") array_push($conditions, " ( videometadata.fanart is null or videometadata.fanart = '') ");
+		if($_POST['nofanart'] == "2") array_push($conditions, " ( videometadata.fanart is not null and videometadata.fanart != '') ");
+	}
 	if(isset($_POST['year_from']) && isset($_POST['year_to']) && $_POST['year_from'] > 0 && $_POST['year_to'] > 0) {
 		array_push($conditions," videometadata.year >= ".intval($_POST['year_from'])." AND videometadata.year <= ".intval($_POST['year_to']));
 	}
 	if(strlen($title)) array_push($conditions," videometadata.title LIKE '%".$title."%' ");	
 	if(strlen($director)) array_push($conditions," videometadata.director LIKE '%".$director."%' ");
+	if(strlen($studio)) array_push($conditions," videometadata.studio LIKE '%".$studio."%' ");
 	if(strlen($plot)) array_push($conditions," videometadata.plot LIKE '%".$plot."%' ");
 
 	if(!empty($conditions)) {
@@ -311,40 +339,5 @@ if($res = $mysqli->query($query. $limit)) {
 exit;
 
 
-function generate_image_thumbnail($source_image_path, $thumbnail_image_path)
-{
-    list($source_image_width, $source_image_height, $source_image_type) = getimagesize($source_image_path);
-    switch ($source_image_type) {
-        case IMAGETYPE_GIF:
-            $source_gd_image = imagecreatefromgif($source_image_path);
-            break;
-        case IMAGETYPE_JPEG:
-            $source_gd_image = imagecreatefromjpeg($source_image_path);
-            break;
-        case IMAGETYPE_PNG:
-            $source_gd_image = imagecreatefrompng($source_image_path);
-            break;
-    }
-    if ($source_gd_image === false) {
-        return false;
-    }
-    $source_aspect_ratio = $source_image_width / $source_image_height;
-    $thumbnail_aspect_ratio = THUMBNAIL_IMAGE_MAX_WIDTH / THUMBNAIL_IMAGE_MAX_HEIGHT;
-    if ($source_image_width <= THUMBNAIL_IMAGE_MAX_WIDTH && $source_image_height <= THUMBNAIL_IMAGE_MAX_HEIGHT) {
-        $thumbnail_image_width = $source_image_width;
-        $thumbnail_image_height = $source_image_height;
-    } elseif ($thumbnail_aspect_ratio > $source_aspect_ratio) {
-        $thumbnail_image_width = (int) (THUMBNAIL_IMAGE_MAX_HEIGHT * $source_aspect_ratio);
-        $thumbnail_image_height = THUMBNAIL_IMAGE_MAX_HEIGHT;
-    } else {
-        $thumbnail_image_width = THUMBNAIL_IMAGE_MAX_WIDTH;
-        $thumbnail_image_height = (int) (THUMBNAIL_IMAGE_MAX_WIDTH / $source_aspect_ratio);
-    }
-    $thumbnail_gd_image = imagecreatetruecolor($thumbnail_image_width, $thumbnail_image_height);
-    imagecopyresampled($thumbnail_gd_image, $source_gd_image, 0, 0, 0, 0, $thumbnail_image_width, $thumbnail_image_height, $source_image_width, $source_image_height);
-    imagejpeg($thumbnail_gd_image, $thumbnail_image_path, 90);
-    imagedestroy($source_gd_image);
-    imagedestroy($thumbnail_gd_image);
-    return true;
-}
+
 ?>

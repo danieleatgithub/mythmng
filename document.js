@@ -76,6 +76,35 @@ $(document).ready(function() {
     });
 	$.ajax({ 
 		type: "POST",
+		url: "/mythmng/mythmngBE.php",
+		dataType: "json", 
+		data: { 
+				request: "get_studio" 
+				},
+		success: function( response ) {
+			var count  = response.count;
+			var text = "";
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}			
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			var studio = JSON.parse(response.out);
+			$('#studio').append("<option></option>");
+			for(i=0;i<count;i++) {
+				$('#studio').append("<option value='"+studio[i]['studio']+"'>"+studio[i]['studio']+"</option>");
+			}
+			$('#studio').selectpicker('refresh');
+			// console.log(studio);
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+    });
+	$.ajax({ 
+		type: "POST",
 		url: "/mythmng/mythmngBE.php", 
 		dataType: "json", 
 		data: {
@@ -136,4 +165,5 @@ $(document).ready(function() {
 
 	// FIXME: wait promise
 	$.getScript("/mythmng/mythmng.js");
+	$.getScript("/mythmng/coverfanart.js");
  }); 

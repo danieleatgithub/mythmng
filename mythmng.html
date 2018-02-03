@@ -12,13 +12,16 @@
 <script src="/js/jquery-1.11.1.js"></script>
 <script src="/jquery-ui-1.11.1.custom/jquery-ui.js"></script>
 <script src="/bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
-<script src="/mythmng/utilities.js"></script>	
 <script src="/bootstrap-select-1.12.4/dist/js/bootstrap-select.js"></script>
 <script src="/Croppie/croppie.js"></script>
+<script src="/mythmng/utilities.js"></script>	
+
+
 
 </head>
 <body style="margin-bottom: 0px; margin-top: 0px; background: #EFEFEF; padding:10px">
-
+<span id="pop-up" class="modal popfan" style="display:none;"><img id="pop-up-image" src=""/></span>
+<div id="fanartzoom" class="modal" style="display:none;"></div>
 <div>
 	<span class="glyphicon glyphicon-triangle-bottom divhide" targetdiv="maintab"  aria-hidden="true" ></span>
 	<div class="container-fluid " id="maintab" >
@@ -88,6 +91,22 @@
 					<option value="1">Da vedere</option>
 					<option value="2">Visti</option>
 				</select>
+				<label class="control-label" for="nocover">Cover</label>
+				<select id="nocover" class='selectpicker' data-width="auto">
+					<option value="0">Tutti</option>
+					<option value="1">Senza Cover</option>
+					<option value="2">Con Cover</option>
+				</select>
+				<label class="control-label" for="nofanart">Fanart</label>
+				<select id="nofanart" class='selectpicker' data-width="auto">
+					<option value="0">Tutti</option>
+					<option value="1">Senza Fanart</option>
+					<option value="2">Con Fanart</option>
+				</select>
+				<label class="control-label" for="director">Regista</label>
+				<select id="director" class='selectpicker' data-width="auto" data-live-search="true"></select>
+				<label class="control-label" for="studio">Studio</label>
+				<select id="studio" class='selectpicker' data-width="auto" data-live-search="true"></select>
 				<label class="control-label" for="year_from">Anno da</label>
 				<input type="text" class="input-group input-group-md" id='year_from' value=''></input>
 				<label class="control-label" for="year_to">Anno a</label>
@@ -110,8 +129,6 @@
 					<option value="50">50</option>
 					<option value="9999">All</option>
 				</select>
-				<label class="control-label" for="director">Regista</label>
-				<select id="director" class='selectpicker' data-width="auto" data-live-search="true"></select>
 			</div>
 			<div class='commanddiv'>						
 				<div class='row'>
@@ -205,33 +222,7 @@
 		<div class="form-group" style="margin-top:5px; margin-bottom:5px;">
 			<div class="row" >
 				<div class="col-xs-2 col-md-1">
-					<div class="thumbnail"><img id="idcover" class="thumberror " alt="No image"></div>
-			
-					<!--div class="demo-wrap upload-demo">
-						<div class="container">
-						<div class="grid">
-							<div class="col-1-2">
-								
-								<div class="actions">
-									<a class="btn file-btn">
-										<span>Upload</span>
-										<input type="file" id="upload" value="Choose a file" accept="image/*" />
-									</a>
-									<button class="upload-result">Result</button>
-								</div>
-							</div>
-							<div class="col-1-2">
-								<div class="upload-msg">
-									Upload a file to start cropping
-								</div>
-								<div class="upload-demo-wrap">
-									<div id="upload-demo"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-					</div-->
-
+					<div class="thumbnail" id="coveredit"><img id="idcover" class="thumberror thumbcover" alt="No image"/></div>
 				</div>
 				<div id="idediticons" class="col-xs-05">
 					<div class="row">
@@ -241,10 +232,10 @@
 						<span id="ideabort" class="glyphicon glyphicon-remove editabort" aria-hidden="true" />
 					</div>
 				<div class="row">
-						<span id="idefanart" class="glyphicon glyphicon-camera editfanart" data-toggle="modal" data-target="#coverfanart" data-mode="fanart" data-placement="right" title="Carica fanart"/>
+						<span id="idefanart" class="glyphicon glyphicon-camera editfanart" data-toggle="modal" data-target="#coverfanart" data-imagename="" data-mode="fanart" data-placement="right" title="Carica fanart"/>
 				</div>
 				<div class="row">
-						<span id="idecover" class="glyphicon glyphicon-film editcover" data-toggle="modal" data-target="#coverfanart" data-index="" data-coverfile="" data-mode="cover" data-placement="right" title="Carica cover" />
+						<span id="idecover" class="glyphicon glyphicon-film editcover" data-toggle="modal" data-target="#coverfanart" data-index="" data-imagename="" data-mode="cover" data-placement="right" title="Carica cover" />
 				</div>
 				</div>
 				<div id="upload-cover" class="croppie-container"></div>
@@ -274,30 +265,28 @@
 	</form>
 </div>
 
+
 <!-- movie view template -->
 <div id="movie-t" style="display:none;" >
 	<div class="row" id="view">
 		<div class="col-xs-2 col-md-1">
-			<div class="thumbnail"><img id="idcover" class="thumberror"  alt="No image"></div>
+			<div class="thumbnail"><img id="idcover" class="thumberror thumbcover"  fanart="" alt="No image"></div>
 		</div>
 		<div id="idicons" class="col-xs-05">
 			<div class="row">
 				<span id="idzoom" class="glyphicon glyphicon glyphicon-zoom-in moviezoom" aria-hidden="true" />
 			</div>
 			<div class="row">
-				<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit" aria-hidden="true" />
+				<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Edit"/>
 			</div>
 			<div class="row">
-				<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" " aria-hidden="true" />
-			</div>
-			<div class="row">
-					<span id="idvfanart" class="glyphicon glyphicon-camera viewfanart" data-toggle="tooltip" data-placement="right" title="Visualizza fanart" />
+				<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" "aria-hidden="true" data-toggle="tooltip" data-placement="right" title="TV play" />
 			</div>
 		</div>
 		<div class="col-xs-15">
 				<div id="idtitle" class="movie-title"></div>
 				<br>
-				<div id="details"></div>
+				<div id="iddetails"></div>
 				<div id="idplot" class="movie-plot"></div>
 		</div>
 	</div>
@@ -333,24 +322,34 @@
 
 <!-- modal coverfanart  -->
 <div class="modal fade" id="coverfanart" tabindex="-1" role="dialog" aria-labelledby="moddirectorLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="moddirectorLabel">titolo</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        </button>
-      </div>
-      <div class="modal-body">
-      </div>
-      <div class="modal-footer">
-       <label for="urlinp" class="col-form-label">Url:</label>
-       <input type="text" class="form-control" id="urlinp">
-       <button type="button" class="btn btn-primary"  >Load</button>
-       <button type="button" class="btn btn-primary" data-dismiss="modal" >Cancel</button>
-        <button type="button" class="btn btn-primary save" data-dismiss="modal" >Ok</button>
-      </div>
-    </div>
-  </div>
+	<div class="modal-dialog modal-lg" role="dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="moddirectorLabel">titolo</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"/>
+			</div>
+			<div class="modal-body">
+				<div id="croppiediv" croppieurl="" />
+			</div>
+			<div class="modal-footer">
+				<center>
+				<button type="button" id="modprev" class="btn btn-info paddedbtn" aria-hidden="true" value="previous">&lt;&lt;</button>
+				<button type="button" id="modshoot" class="btn btn-info paddedbtn" aria-hidden="true" value="ldshoot">Carica screenshoot</button>
+				<button type="button" id="modshootrmv" class="btn btn-info paddedbtn" aria-hidden="true" value="ldshoot">Rimuovi screenshoot</button>
+				<button type="button" id="modnext" class="btn btn-info paddedbtn" aria-hidden="true" value="next">&gt;&gt;</button>
+				<input type="hidden" id="currentshoot" value="" /> 
+				<label for="urlinp" class="col-form-label">Url:</label>
+				<input type="text" class="form-control" id="urlinp">
+				<button type="button" class="btn btn-info paddedbtn" id="loadbtn" >Carica</button>
+				<br>
+				<button type="button" class="btn btn-primary paddedbtn copy " data-dismiss="modal" >Copia url</button>
+				<button type="button" class="btn btn-primary paddedbtn copyfrom" data-dismiss="modal" >Copia immagine</button>
+				<button type="button" class="btn btn-primary paddedbtn save" data-dismiss="modal" >Taglia e Salva</button>
+				<button type="button" class="btn btn-primary paddedbtn" 	  data-dismiss="modal" >Annulla</button>
+				</center>
+			</div>
+		</div>
+	</div>
 </div>
 
 
@@ -359,5 +358,6 @@
 <script type="text/javascript" src="/mythmng/charts/Chart.js"></script>
 <script type="text/javascript" src="/mythmng/jquery.bootpag.min.js"></script>
 <script src="/mythmng/document.js"></script>	
+
 
 </body></html>

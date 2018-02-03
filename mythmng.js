@@ -1,12 +1,16 @@
 
+
 // reset search tab
 $('#reset').on('click', function() {
   $('#result-'+$(this).data('target')).addClass('hide');
   $('#freetxt').val("");
   $('#movies4page').selectpicker('val', '20');
   $('#ordered').selectpicker('val', '0');
+  $('#nocover').selectpicker('val', '0');
+  $('#nofanart').selectpicker('val', '0');
   $('#watched').selectpicker('val', '0');
   $('#director').selectpicker('val', '');
+  $('#studio').selectpicker('val', '');
   $('#title_in').val("");
   $('#plot_in').val("");
   $('#year_from').val("");
@@ -45,13 +49,35 @@ $('.divhide').on('click', function() {
   }
 });
 
-// view movie detail
+ 
 $('.moviezoom').on('click', function() {
 	var index = $(this).attr('index');
-	console.log("editabort "+index);
+	console.log("moviezoom "+index);
  });
  
-
+ // view movie detail
+$('.thumbcover').on('mouseover', function() {
+	var fanart = $(this).attr('fanart');
+	if(fanart.length == 0) {
+	  fanart = '/mythmng/nopic.png';
+	}
+	$('#fanartzoom').css({ 
+		'background-image': 'url('+fanart+')',
+		'backgroundRepeat': 'no-repeat',
+		'background-size': 'contain',
+		'max-width': '720px',
+		'max-height': '480px',
+		'position': 'fixed',
+		'margin-left': '20%',
+		'margin-top': '10%'
+	});	
+	$('#fanartzoom').show();
+ });
+$('.thumbcover').on('mouseout', function() {
+	$('#fanartzoom').hide();
+ });
+ 
+ 
  $('#ordered').on('change', function() {
 	 if($(this).val() == 1) {
 		$('#ascdesc').html('Crescente');
@@ -112,9 +138,9 @@ $('#viewbtn').on('click', function() {
 });
 
 $('.thumberror').error(function(){
+	console.log("thumberror: "+$(this).attr('src'));
 	$(this).attr('src', '/mythmng/nopic.png');
 	$(this).off("error");
-	console.log("thumberror");
 }).attr('src', '/mythmng/nopic.png');
 
  // play movie on frontend
@@ -134,14 +160,17 @@ $('.movieplay').on('click', function() {
 			if(response.error) {
 				$('#homeout').html("<pre>"+response.out+"</pre>");
 				$('#divmsg').html(getAlert(response.message));			
+				console.error(response.debug);
 				return;
 			}			
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			var result = JSON.parse(response.out);
-			console.log(result);
 		},
 		error: function( request, error ) {
-			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(debug) {
+				$('#divdeb').html(getInfo(response.debug));
+				console.error(response.debug);
+			}
 			$('#divmsg').html(getAlert(error));			
 		},
 	});
@@ -168,12 +197,15 @@ $('.editok').on('click', function() {
 	var index = $(this).attr('index');
 	var videoid = $(this).attr('videoid');
 	var moviecontainer = $("#movie-"+index).find("#edit").parent();
-	var editdiv = $("#movie-"+index).find("#edit")
-	var year 	= editdiv.find("#idyear").val();
-	var title 	= editdiv.find("#idtitle").val();
-	var plot 	= editdiv.find("#idplot").val();
-	var director = editdiv.find("#eddirector").val();
-	
+	var editdiv 	= $("#movie-"+index).find("#edit")
+	var year 		= editdiv.find("#idyear").val();
+	var title 		= editdiv.find("#idtitle").val();
+	var plot 		= editdiv.find("#idplot").val();
+	var director 	= editdiv.find("#eddirector").val();
+	var coverfile	= editdiv.find("#idcover").attr('coverfile');
+	var fanart_url	= editdiv.find("#idcover").attr('fanart');
+	var fanart 		=    fanart_url.split('/').pop();
+
 	$.when( $.ajax({ 
 		type: "POST",
 		url: "/mythmng/mythmngBE.php", 
@@ -184,13 +216,16 @@ $('.editok').on('click', function() {
 				year: year,
 				title: title,
 				director: director,
-				plot: plot
+				plot: plot,
+				coverfile: coverfile,
+				fanart: fanart
 				},
 		success: function( response ) {
 			var text = "";
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			if(response.error) {
 				$('#divmsg').html(getAlert(response.message));	
+				console.error(response.debug);
 				return;
 			}			
 			moviecontainer.empty();	
@@ -198,7 +233,10 @@ $('.editok').on('click', function() {
 			
 		},
 		error: function( request, error ) {
-			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(debug) {
+				$('#divdeb').html(getInfo(response.debug));
+				console.error(response.debug);
+			}
 			$('#divmsg').html(getAlert(error));			
 		}
 	}) ).then (
@@ -248,19 +286,10 @@ $('.editabort').on('click', function() {
 $('.editbox').on('change', function() {
 	var index = $(this).attr('index');
 	var editdiv = $("#movie-"+index).find("#edit")
-	console.log("Element is edited:"+index);
 	$(this).css("background-color","yellow");
 	editdiv.find('#ideok').show();
 });
  
-$('#idefanart').on('click', function() {
-	console.log("idefanart click");
-});
-
-$('#idecover').on('click', function() {
-	console.log("idecover click");
-});
-
 $('#moddirector').on('hide.bs.modal', function (event) {
   var button = $(document.activeElement);
   var modal  = $(this)
@@ -268,30 +297,18 @@ $('#moddirector').on('hide.bs.modal', function (event) {
 	var index = modal.attr('index');	  
 	var newdirector = modal.find('#director-name').val();
 	var eddirector	= $('#movieedit-'+index).find('#eddirector');
-	//console.log('Index:'+index+' old:'+$(eddirector).selectpicker('val')+' new:'+newdirector);
 	eddirector.append(newdirector);
 	eddirector.append("<option value='"+newdirector+"'>"+newdirector+"</option>");
 	eddirector.selectpicker('refresh');
 	eddirector.selectpicker('val',newdirector);
 	eddirector.selectpicker('refresh');
 	eddirector.trigger('change');
-
   }
 });
 
+// ********************************************
+// cover edit
 
-$('#coverfanart').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget);
-  var mode = button.data('mode');
-  var modal = $(this);
-  var index = button.data('index');	  
-  var coverfile = button.data('coverfile');
 
-  modal.find('.modal-title').text('Modifica ' + mode+" "+coverfile+" "+index);
-  modal.find('.modal-body').empty();
-  modal.find('.modal-body').html('<img src="http://192.168.1.66/coverart/'+coverfile+'" class="img-fluid" alt="'+coverfile+'">');
-  
-  
-})
 
 
