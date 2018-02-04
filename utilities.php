@@ -42,4 +42,28 @@ function generate_image_thumbnail($source_image_path, $thumbnail_image_path)
     return true;
 }
 
+
+
+function _exit_on_parameter_error($response) {
+		$text = $_POST['request']." missed parameters ";
+		trigger_error ($text,E_USER_NOTICE);
+		$response['message'] = $text;	
+		$response['debug'] = print_r($_POST,true);	
+		header('Content-type: application/json');
+		echo json_encode($response);		
+		exit(); 	
+}
+
+function _exit_on_query_error($response,$error,$query) {
+		$text = $_POST['request']." query error ".$error;
+		trigger_error($text,E_USER_NOTICE);
+		$response['message'] = $text;	
+		$response['debug'] = print_r($_POST,true).$query;	
+		header('Content-type: application/json');
+		echo json_encode($response);		
+		exit(); 	
+}
+
+
+
 ?>

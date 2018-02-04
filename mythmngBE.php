@@ -30,7 +30,7 @@ if(!isset($_POST['request'])) {
 	exit(); 	
 }
 
-$mysqli = new mysqli($_db['ip'], $_db['user'], $_db['password'], "mythconverg");
+$mysqli = new mysqli($_mythmng['ip'], $_mythmng['user'], $_mythmng['password'], "mythconverg");
 if ($mysqli->connect_errno) { 
 	$response_array['message'] = $mysqli->connect_errno;	
 	header('Content-type: application/json');
@@ -49,6 +49,10 @@ if(!$mysqli->query($query)) {
 	
 }
 
+
+
+
+
 if($_POST['request'] == "get_genre") {
 	$query = "SELECT * FROM videogenre ORDER by genre";
 	$mysqli->set_charset("utf8");
@@ -66,10 +70,7 @@ if($_POST['request'] == "get_genre") {
 		echo json_encode($response_array);	
 		exit;
 	} else {
-		$response_array['message'] = $mysqli->error;	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;
+		_exit_on_query_error($response_array,$mysqli->error,$query);
 	}
 }
 
@@ -91,10 +92,7 @@ if($_POST['request'] == "get_director") {
 		echo json_encode($response_array);	
 		exit;
 	} else {
-		$response_array['message'] = $mysqli->error;	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;
+		_exit_on_query_error($response_array,$mysqli->error,$query);
 	}
 }
 
@@ -116,19 +114,15 @@ if($_POST['request'] == "get_studio") {
 		echo json_encode($response_array);	
 		exit;
 	} else {
-		$response_array['message'] = $mysqli->error;	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;
+		_exit_on_query_error($response_array,$mysqli->error,$query);
 	}
 }
 
-
 if($_POST['request'] == "get_info") {
-	$query = "SELECT COUNT(*) as total FROM videometadata";
+	$query = "SELECT COUNT(*) as cnt_video FROM videometadata";
 	if($res = $mysqli->query($query)) {
 		$row = $res->fetch_array(MYSQLI_ASSOC);
-		$rout['total'] = $row['total'];
+		$rout['cnt_video'] = $row['cnt_video'];
 		
 		$genre = array();
 		$cnt=0;
@@ -138,6 +132,12 @@ if($_POST['request'] == "get_info") {
 				$cnt++;
 				array_push($genre,$row);
 			}
+			$query = "SELECT COUNT(*) as cnt_recorded FROM recorded where recgroup='Default'";
+			if($res = $mysqli->query($query)) {
+				$row = $res->fetch_array(MYSQLI_ASSOC);
+				$rout['cnt_recorded'] = $row['cnt_recorded'];
+			} else _exit_on_query_error($response_array,$mysqli->error,$query);
+			
 			$rout['genre'] = $genre;
 			$response_array['error']	= false;
 			$response_array['count'] 	= $cnt;
@@ -145,9 +145,10 @@ if($_POST['request'] == "get_info") {
 			header('Content-type: application/json');
 			echo json_encode($response_array);	
 			exit;	
-		}
-		
-	} 
+		} else 	_exit_on_query_error($response_array,$mysqli->error,$query);
+
+	} else 	_exit_on_query_error($response_array,$mysqli->error,$query);
+
 	$response_array['message'] = $mysqli->error;	
 	header('Content-type: application/json');
 	echo json_encode($response_array);	
@@ -155,30 +156,52 @@ if($_POST['request'] == "get_info") {
 	
 }
 
+if($_POST['request'] == "set_watched") {
+	if(!isset($_POST['videoid']) || !isset($_POST['state'])) _exit_on_parameter_error($response_array);
+	$watched = 0;
+	if($_POST['state'] == 'true') $watched = 1;
+	
+	$query = "UPDATE `mythconverg`.`videometadata` SET ";
+	$query .= "`watched`='".$watched."'";
+	$query .= " WHERE  `intid`=".intval($_POST['videoid']);
+	$response_array['debug'] 	= $query;
 
-if($_POST['request'] == "set_data") {
-	if(!isset($_POST['videoid']) || !isset($_POST['year']) || !isset($_POST['title']) || !isset($_POST['plot']) || !isset($_POST['director']) || !isset($_POST['coverfile']) || !isset($_POST['fanart'])) {
-		$response_array['message'] = "set_data missing parameters";	
+	if(!($res = $mysqli->query($query))) _exit_on_query_error($response_array,$mysqli->error,$query);
+
+	$response_array['count'] = $mysqli->affected_rows;	
+	if($response_array['count'] != 1 ){
+		$response_array['message']  = "Modificati ".$response_array['count']." record ";	
 		header('Content-type: application/json');
-		echo json_encode($response_array);		
-		exit(); 	
+		echo json_encode($response_array);	
+		exit;
 	}
 	
+	$response_array['error']	= false;
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
+
+}
+
+if($_POST['request'] == "set_data") {
+	if(!isset($_POST['videoid']) || !isset($_POST['year']) || !isset($_POST['title']) || !isset($_POST['plot']) || !isset($_POST['director']) || !isset($_POST['coverfile']) || !isset($_POST['fanart']) || !isset($_POST['studio'])) _exit_on_parameter_error($response_array);
 	
+	if($_POST['studio'] == "Assente") $_POST['studio'] = "";
 	
 	$mysqli->set_charset("utf8");
 	$title = $mysqli->real_escape_string($_POST['title']);
 	$plot = $mysqli->real_escape_string($_POST['plot']);
 	$director = $mysqli->real_escape_string($_POST['director']);
+	$studio = $mysqli->real_escape_string($_POST['studio']);
 	$coverfile = $_POST['coverfile'];
 	$fanart = $_POST['fanart'];
-	trigger_error ("C:".$coverfile,E_USER_NOTICE);
-	trigger_error ("F:".$fanart,E_USER_NOTICE);
+	// trigger_error ("C:".$coverfile,E_USER_NOTICE);
+	// trigger_error ("F:".$fanart,E_USER_NOTICE);
 
 	// Update coverart on filesystem
 	$coverfile_target = "/var/lib/mythtv/coverart/".$coverfile;	
-	$coverfile_tmp	  = "/var/www/tmp/coverart/".$coverfile;
-	$coverfile_thumb  = "/var/www/coverart_thumb/".pathinfo($coverfile,PATHINFO_FILENAME).".jpg";
+	$coverfile_tmp	  = $_mythmng['www']."/tmp/coverart/".$coverfile;
+	$coverfile_thumb  = $_mythmng['www'].$_mythmng['thumbnail'].pathinfo($coverfile,PATHINFO_FILENAME).".jpg";
 	$cover_ok 		  = true;
 	$cover_changed	  = false;
 	if(!file_exists($coverfile_target) && file_exists($coverfile_tmp)) {
@@ -210,8 +233,8 @@ if($_POST['request'] == "set_data") {
 	}
 
 	// Update fanart on filesystem
-	$fanart_target = "/var/lib/mythtv/fanart/".$fanart;
-	$fanart_tmp	  = "/var/www/tmp/fanart/".$fanart;
+	$fanart_target = $_mythmng['www']."/fanart/".$fanart;
+	$fanart_tmp	  =  $_mythmng['www']."/tmp/fanart/".$fanart;
 	$fanart_ok 		  = true;
 	$fanart_changed	  = false;
 	if(!file_exists($fanart_target) && file_exists($fanart_tmp)) {
@@ -247,20 +270,15 @@ if($_POST['request'] == "set_data") {
 	$query .= ", `title`='".$title."'";
 	$query .= ", `plot`='".$plot."'";
 	$query .= ", `director`='".$director."'";
+	$query .= ", `studio`='".$studio."'";
 	$query .= ", `coverfile`='".$coverfile."'";
 	$query .= ", `fanart`='".$fanart."'";
 	$query .= " WHERE  `intid`=".intval($_POST['videoid']);
 	$response_array['debug'] 	= $query;
 	
-	if(!($res = $mysqli->query($query))) {
-		trigger_error($mysqli->error,E_USER_NOTICE);
-		$response_array['message']  = $mysqli->error;	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;
-	}
-	$response_array['count'] = $mysqli->affected_rows;
+	if(!($res = $mysqli->query($query))) _exit_on_query_error($response_array,$mysqli->error,$query);
 	
+	$response_array['count'] = $mysqli->affected_rows;	
 	if($response_array['count'] != 1 && $cover_changed = false && $fanart_changed = false ){
 		$response_array['message']  = "Modificati ".$response_array['count']." record ";	
 		header('Content-type: application/json');
@@ -275,14 +293,8 @@ if($_POST['request'] == "set_data") {
 	
 }
 
-
 if($_POST['request'] == "set_genre") {
-	if(!isset($_POST['state']) || !isset($_POST['videoid']) || !isset($_POST['genreid'])) {
-		$response_array['message'] = "set_genre missing parameters";	
-		header('Content-type: application/json');
-		echo json_encode($response_array);		
-		exit(); 	
-	}
+	if(!isset($_POST['state']) || !isset($_POST['videoid']) || !isset($_POST['genreid'])) _exit_on_parameter_error($response_array);
 	
 	if($_POST['state'] == "true") {
 		$query = "INSERT INTO `mythconverg`.`videometadatagenre` (`idvideo`, `idgenre`) VALUES (".$_POST['videoid'].", ".$_POST['genreid'].")";
@@ -291,12 +303,8 @@ if($_POST['request'] == "set_genre") {
 	}
 	$response_array['debug'] 	= $query;
 	
-	if(!($res = $mysqli->query($query))) {
-		$response_array['message']  = $mysqli->error;	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;
-	}
+	if(!($res = $mysqli->query($query))) _exit_on_query_error($response_array,$mysqli->error,$query);
+	
 	$response_array['count'] = $mysqli->affected_rows;
 	
 	if($response_array['count'] != 1){
@@ -313,16 +321,11 @@ if($_POST['request'] == "set_genre") {
 	
 }
 
-
 if($_POST['request'] == "save_image") {
-	if(!isset($_POST['mode']) || !isset($_POST['videoid']) || !isset($_POST['extension']) || !isset($_POST['base64img'])) {
-		trigger_error ("save_image missing parameters",E_USER_NOTICE);
-		$response_array['message'] = "save_image missing parameters";	
-		header('Content-type: application/json');
-		echo json_encode($response_array);		
-		exit(); 	
-	}
-	$tmp_path = "/var/www/tmp/";
+	if(!isset($_POST['mode']) || !isset($_POST['videoid']) || !isset($_POST['extension']) || !isset($_POST['base64img'])) _exit_on_parameter_error($response_array);
+	
+	
+	$tmp_path = $_mythmng['www']."/tmp/";
 	$tmp_url  = "/tmp/";
 	if($_POST['mode'] == "cover") {
 		$image_name  = "CD_C-".$_POST['videoid'];
@@ -358,19 +361,15 @@ if($_POST['request'] == "save_image") {
 }
 
 if($_POST['request'] == "rename_image") {
-	if(!isset($_POST['mode']) || !isset($_POST['videoid'])|| !isset($_POST['source'])) {
-		trigger_error ("rename_image missing parameters",E_USER_NOTICE);
-		$response_array['message'] = "rename_image missing parameters";	
-		header('Content-type: application/json');
-		echo json_encode($response_array);		
-		exit(); 	
-	}
+	if(!isset($_POST['mode']) || !isset($_POST['videoid'])|| !isset($_POST['source'])) _exit_on_parameter_error($response_array);
+	
+	
 	$rename_ok = true;
-	$source_image = '/var/www/'.$_POST['source'];
+	$source_image = $_mythmng['www'].$_POST['source'];
 	$source_filename = basename($source_image);
 	if($_POST['mode'] == "cover") {
 		$destname 	= "CD_C-".$_POST['videoid'].".".pathinfo($source_filename,PATHINFO_EXTENSION);
-		$dest  		= "/var/www/tmp/coverart/".$destname;
+		$dest  		= $_mythmng['www'].$_mythmng['coverart'].$destname;
 		if(strpos($source_image,'screenshoot')) $rename_ok 	= copy($source_image,$dest);
 		else 									$rename_ok 	= rename($source_image,$dest);
 		$rout['url'] = "/tmp/coverart/".$destname;
@@ -378,7 +377,7 @@ if($_POST['request'] == "rename_image") {
 	}
 	if($_POST['mode'] == "fanart"){
 		$destname 	= "CD_F-".$_POST['videoid'].".".pathinfo($source_filename,PATHINFO_EXTENSION);
-		$dest  		= "/var/www/tmp/fanart/".$destname;
+		$dest  		= $_mythmng['www']."/tmp/fanart/".$destname;
 		if(strpos($source_image,'screenshoot')) $rename_ok 	= copy($source_image,$dest);
 		else 									$rename_ok 	= rename($source_image,$dest);
 		$rout['url'] = "/tmp/fanart/".$destname;
@@ -400,14 +399,11 @@ if($_POST['request'] == "rename_image") {
 }
 
 if($_POST['request'] == "screenshoot") {
-	if(!isset($_POST['current']) || !isset($_POST['command'])) {
-		$response_array['message'] = "get_screenshoot missing parameters";	
-		header('Content-type: application/json');
-		echo json_encode($response_array);		
-		exit(); 	
-	}
+	if(!isset($_POST['current']) || !isset($_POST['command'])) _exit_on_parameter_error($response_array);
+	
+	
 	$current = basename($_POST['current']);
-	$files=scandir('/var/www/screenshoot');	
+	$files=scandir($_mythmng['www'].'/screenshoot');	
 	$previous = $current;
 	$stoponnext = false;
 	foreach($files as $file) {
@@ -430,7 +426,7 @@ if($_POST['request'] == "screenshoot") {
 				break;			
 			}
 			if($_POST['command'] == 'delete') {
-				$ret = unlink('/var/www/screenshoot/'.basename($_POST['current']));
+				$ret = unlink($_mythmng['www'].'/screenshoot/'.basename($_POST['current']));
 				if($ret == false ) {
 					$response_array['message'] = 'cannot delete '.basename($_POST['current']);	
 					header('Content-type: application/json');
@@ -451,22 +447,18 @@ if($_POST['request'] == "screenshoot") {
 	exit;	
 }
 
-
 if($_POST['request'] == "get_ext_image") {
-	if(!isset($_POST['url']) || !isset($_POST['mode'])) {
-		$response_array['message'] = "get_ext_image missing parameters";	
-		header('Content-type: application/json');
-		echo json_encode($response_array);		
-		exit(); 	
-	}
-	$tmp_path = "/var/www/tmp/tmp/";
+	if(!isset($_POST['url']) || !isset($_POST['mode'])) _exit_on_parameter_error($response_array);
+	
+	
+	$tmp_path = $_mythmng['www']."/tmp/tmp/";
 	$tmp_url  = "/tmp/tmp/";		
 	if($_POST['mode'] == "cover") {
-		$tmp_path = "/var/www/tmp/coverart/";
+		$tmp_path = $_mythmng['www']."/tmp/coverart/";
 		$tmp_url  = "/tmp/coverart/";
 	}
 	if($_POST['mode'] == "fanart") {
-		$tmp_path = "/var/www/tmp/fanart/";
+		$tmp_path = $_mythmng['www']."/tmp/fanart/";
 		$tmp_url  = "/tmp/fanart/";		
 	}
 		
@@ -501,36 +493,35 @@ if($_POST['request'] == "video_play") {
 	$address = "127.0.0.1";
 	$service_port = 6546;
 
-	if(!isset($_POST['intid'])) {
-		$response_array['message'] = "id video mancante";	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;		
+	if(!isset($_POST['id']) || !isset($_POST['type'])) _exit_on_parameter_error($response_array);
+	
+	if($_POST['type'] == "video") {
+		$query = "select videometadata.filename from videometadata where videometadata.intid = ".intval($_POST['id']);
+		if($res = $mysqli->query($query)) {
+			$row = $res->fetch_array(MYSQLI_ASSOC);
+			$filename   = $row['filename'];
+		} else {
+			_exit_on_query_error($response_array,$mysqli->error,$query);
+		}
+		$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Videos"';
 	}
-	$query = "select videometadata.title, videometadata.filename from videometadata where videometadata.intid = ".intval($_POST['intid']);
-	if($res = $mysqli->query($query)) {
-		$row = $res->fetch_array(MYSQLI_ASSOC);
-		$title 		= $row['title'];
-		$filename   = $row['filename'];
-	} else {
-		$response_array['debug'] 	= $query;
-		$response_array['message']  = $mysqli->error;	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;
+	if($_POST['type'] == "recorded") {
+		$query = "select recorded.basename from recorded where recorded.recordedid = ".intval($_POST['id']);
+		if($res = $mysqli->query($query)) {
+			$row = $res->fetch_array(MYSQLI_ASSOC);
+			$filename   = $row['basename'];
+		} else {
+			_exit_on_query_error($response_array,$mysqli->error,$query);
+		}
+		$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Default"';
 	}
 	
-	$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Videos"';
 	if($res = $mysqli->query($query)) {
 		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
 			array_push($storage,$row['dirname']);
 		}
 	} else {
-		$response_array['debug'] 	= $query;
-		$response_array['message']  = $mysqli->error;	
-		header('Content-type: application/json');
-		echo json_encode($response_array);	
-		exit;
+		_exit_on_query_error($response_array,$mysqli->error,$query);
 	}
 	$fullpath = "";
 	foreach($storage as $dir) {
@@ -568,7 +559,6 @@ if($_POST['request'] == "video_play") {
 	$ln = "exit\n"; 
 	socket_write($socket, $ln, strlen($ln));
 	while ($out = socket_read($socket, 2048)) {
-		trigger_error($out,E_USER_NOTICE);
 		array_push($rout,$out);
 	}
 	socket_close($socket);
@@ -583,6 +573,7 @@ if($_POST['request'] == "video_play") {
 	exit;	
 				
 }
+
 
 
 

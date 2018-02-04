@@ -1,9 +1,10 @@
-var debug 			= false;
+var debug 		= false;
 var descending 		= false;
 var genre_and 		= false;
-var info 	= [];
-var records = [];
-var genre_strings = [];
+var info 			= [];
+var records 		= [];
+var recordings 		= []; 
+var genre_strings 	= [];
 
 
 $(document).ready(function() {
@@ -92,7 +93,9 @@ $(document).ready(function() {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			var studio = JSON.parse(response.out);
 			$('#studio').append("<option></option>");
+			$('#studio').append("<option>Assente</option>");
 			for(i=0;i<count;i++) {
+				if(studio[i]['studio'].length == 0) continue; // Empty is the first option
 				$('#studio').append("<option value='"+studio[i]['studio']+"'>"+studio[i]['studio']+"</option>");
 			}
 			$('#studio').selectpicker('refresh');
@@ -113,8 +116,6 @@ $(document).ready(function() {
 		success: function( response ) {
 			var ctx = document.getElementById("myChart");
 			var count  = response.count;
-			var text = "";
-
 			if(response.error) {
 				$('#homeout').html("<pre>"+response.out+"</pre>");
 				$('#divmsg').html(getAlert(response.message));			
@@ -123,7 +124,9 @@ $(document).ready(function() {
 
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			info = JSON.parse(response.out);
-			$('#homeleft').append("Totale video: "+info['total']);
+			// console.log(info);
+			$('#homeleft').append("Totale video: "+info['cnt_video']);
+			$('#homeleft').append("<br>Totale registrazioni: "+info['cnt_recorded']);
 			var colors = palette('rainbow', info['genre'].length);
 			var data_set 	= [];
 			var data_labels = [];

@@ -20,7 +20,8 @@ function disableAllTabs() {
 
 function buildViewMovieRecord(id,movie,cast,genre) {
 	// console.log(movie);
-	var obj=$("#movie-t").clone(true,true).attr('id', 'movie-'+ id).insertAfter("#movie-t");
+	var obj=$("#movie-t").clone(true,true).attr('id', 'mythentry-'+ id).insertAfter("#movie-t");
+	
 	var thumb = movie['coverfile'].substring(0, movie['coverfile'].lastIndexOf('.'));
 	var txt = "";	
 	var txtcast = "";
@@ -38,12 +39,14 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 	for(var i=0,s=''; i<genre.length; i++,s=',') {
 		if(genre[i].startsWith('_') && !debug) continue;
 		txtgenre+= 	s+genre[i];
-	}		
+	}
+
+
 	obj.attr('index',id);
 	obj.find('#idedit').attr('index',id);
 	obj.find('#idcover').attr('index',id);
 	obj.find('#idcover').attr('fanart','/fanart/'+movie['fanart']);
-	obj.find('#idplay').attr('index',id);
+	obj.find('#idplay').attr('playid',movie['intid']);
 	obj.find('#idcover').attr('src','/coverart_thumb/'+thumb+'.jpg');
 	obj.find('#idtitle').html(movie['title']+' ('+movie['year']+')');
 	obj.find('#iddetails').html( '<strong>Regia:</strong> '+movie['director']+
@@ -53,11 +56,13 @@ function buildViewMovieRecord(id,movie,cast,genre) {
 								txtdebug);
 	obj.find('#idgenre').html(txtgenre);
 	obj.find('#idplot').html(movie['plot']);
+	if(movie['watched'] == true) obj.find('#iconbox').append("<span class='glyphicon glyphicon-eye-open' data-toggle='tooltip' data-placement='right' title='visto'/>");
+	else 						 obj.find('#iconbox').append("<span class='glyphicon glyphicon-eye-close' data-toggle='tooltip' data-placement='right' title='da vedere'/>");
+	
 	obj.show();
 	$('span[rel=tooltip]').tooltip();		
 	return(obj);
 }
-
 
 function buildEditMovieRecord(id,movie,cast,genre) {
 	// console.log("buildEditMovieRecord "+id);
@@ -102,6 +107,7 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	var idplot	= obj.find('#idplot');
 	var idtitle	= obj.find('#idtitle');
 	var eddirector	= obj.find('#eddirector');
+	var edstudio	= obj.find('#edstudio');
 	var idyear	= obj.find('#idyear');
 	
 	obj.attr('index',id);
@@ -115,7 +121,9 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 		
 	eddirector.attr('index',id);
 	eddirector.html($('#director').html());
-	
+
+	edstudio.attr('index',id);
+	edstudio.html($('#studio').html());
 	idyear.val(movie['year']);
 	idyear.attr('index',id);
 	
@@ -133,6 +141,9 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	obj.find('#adddirector').attr('data-index',id);
 	obj.find('#moddirector').attr('index',id);
 
+	obj.find('#addstudio').attr('data-index',id);
+	obj.find('#modstudio').attr('index',id);
+
 	obj.find('#idefanart').attr('data-index',id);
 	obj.find('#idefanart').attr('data-imagename',movie['fanart']);
 	
@@ -140,15 +151,80 @@ function buildEditMovieRecord(id,movie,cast,genre) {
 	obj.find('#idecover').attr('data-imagename',movie['coverfile']);
 
 
+	if(movie['watched'] == true) obj.find('#ediconbox').append("<span class='glyphicon glyphicon-eye-open'  onclick='set_watched(this,"+videoid+")' data-toggle='tooltip' data-placement='right' title='visto'/>");
+	else 						 obj.find('#ediconbox').append("<span class='glyphicon glyphicon-eye-close' onclick='set_watched(this,"+videoid+")' data-toggle='tooltip' data-placement='right' title='da vedere'/>");
+
+
+
+
 	obj.show();
 	idplot.height( idplot[0].scrollHeight );
 	eddirector.addClass("selectpicker");
 	eddirector.selectpicker('val',movie['director']);
 	eddirector.selectpicker('refresh');
+	edstudio.addClass("selectpicker");
+	edstudio.selectpicker('val',movie['studio']);
+	edstudio.selectpicker('refresh');
 	$('span[rel=tooltip]').tooltip();		
 	return(obj);
 }
 
+function buildViewRecorded(id,recorded,channel,screenshot) {
+	// console.log(recorded);
+	var obj=$("#recorded-t").clone(true,true).attr('id', 'mythentry-'+ id).insertAfter("#recorded-t");
+	
+	obj.attr('index',id);
+	obj.find('#idrshoot').attr('src',screenshot);	 
+	obj.find('#idrshoot').attr('fanart',screenshot);
+	obj.find('#idredit').attr('index',id);
+	obj.find('#idrplay').attr('playid',recorded['recordedid']);
+	obj.find('#idrtitle').html(recorded['title']);
+	obj.find('#idrsubtitle').html(recorded['subtitle']);
+	obj.find('#idrdetails').html(channel+" "+recorded['starttime']+" "+recorded['category']);
+	obj.find('#idrdescription').html(recorded['description']);
+	obj.show();
+	$('span[rel=tooltip]').tooltip();		
+	return(obj);
+}
+
+function buildEditRecorded(id,recorded,channel,screenshot) {
+	var obj=$("#recordededit-t").clone(true,true).attr('id', 'recordededit-'+ id).insertAfter("#recordededit-t");
+	var recordedid	= recorded['recordedid'];
+	
+	obj.attr('index',id);
+	obj.attr('recordedid',recordedid);
+	
+	obj.find('#ideok').attr('index',id);
+	obj.find('#ideok').attr('recordedid',recordedid);
+	
+	obj.find('#ideabort').attr('index',id);
+	obj.find('#ideabort').attr('recordedid',recordedid);
+
+	obj.find('#idtitle').attr('index',id);
+	obj.find('#idtitle').val($("<textarea/>").html(recorded['title']).text());
+
+	obj.find('#idsubtitle').attr('index',id);
+	obj.find('#idsubtitle').val($("<textarea/>").html(recorded['subtitle']).text());
+
+	obj.find('#idfixtitle').attr('index',id);
+	obj.find('#idfixtitle').attr('recordedid',recordedid);
+	
+	obj.find('#idrecinfo').attr('index',id);
+	obj.find('#idrecinfo').attr('recordedid',recordedid);
+	
+	obj.find('#idplot').attr('index',id);
+	obj.find('#idplot').html(recorded['description']);
+		
+	obj.find('#idcover').attr('index',id);
+	obj.find('#idcover').attr('src',screenshot);
+	obj.find('#idcover').attr('fanart',screenshot);
+	
+	obj.show();
+	obj.find('#idplot').height( obj.find('#idplot')[0].scrollHeight );
+	obj.find('#idplot').height( 90 );
+	$('span[rel=tooltip]').tooltip();		
+	return(obj);
+}
 
 function edit_genre() {
 	// console.log(this);
@@ -169,28 +245,28 @@ function edit_genre() {
 		
 	}
 	$.ajax({ 
-	type: "POST",
-	url: "/mythmng/mythmngBE.php", 
-	dataType: "json", 
-	data: { 
-			request: "set_genre",
-			state: 	 newvalue, 
-			videoid: videoid,
-			genreid: genreid
-			},
-	success: function( response ) {
-		var text = "";
-		if(debug) $('#divdeb').html(getInfo(response.debug));
-		if(response.error) {
-			$('#divmsg').html(getAlert(response.message));	
-			return;
-		}			
-	},
-	error: function( request, error ) {
-		if(debug) $('#divdeb').html(getInfo(response.debug));
-		$('#divmsg').html(getAlert(error));			
-	}
-});
+		type: "POST",
+		url: "/mythmng/mythmngBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "set_genre",
+				state: 	 newvalue, 
+				videoid: videoid,
+				genreid: genreid
+				},
+		success: function( response ) {
+			var text = "";
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(response.error) {
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}			
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
 
 }
 
@@ -200,7 +276,7 @@ function refresh_video(container,videoid,index) {
 		
 		$.ajax({ 
 		type: "POST",
-		url: "/mythmng/viewBE.php", 
+		url: "/mythmng/videoBE.php", 
 		dataType: "json", 
 		data: {
 				videoid:		videos
@@ -228,6 +304,40 @@ function refresh_video(container,videoid,index) {
     });
 
 }
+
+function refresh_recorded(container,recordedid,index) {
+		
+		$.ajax({ 
+		type: "POST",
+		url: "/mythmng/recordedBE.php", 
+		dataType: "json", 
+		data: {
+				request:		'get_recorded',
+				recordedid:		recordedid
+				},
+		success: function( response ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(!response.error) {
+				var rx = JSON.parse(response.out);
+				recordings[index] = rx[0];
+				recorded 	= recordings[index]['recorded'];
+				channel  	= recordings[index]['channel'];
+				screenshot 	= recordings[index]['screenshot'];
+				var obj = buildViewRecorded(index,recorded,channel,screenshot);
+				container.append(obj);
+			} else {
+				$('#divmsg').html(getAlert(response.message));
+			}			
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+    });
+
+}
+
+
 // class viewbtn
 function view_page(page) {
    var ordered 		= $('#ordered').val();
@@ -250,10 +360,9 @@ function view_page(page) {
 	}	
 	});
 	$('#divout').empty();
-	// console.log(director);
 	$.ajax({ 
 		type: "POST",
-		url: "/mythmng/viewBE.php", 
+		url: "/mythmng/videoBE.php", 
 		dataType: "json", 
 		data: {
 				videoid:		videoid,
@@ -423,5 +532,71 @@ function modal_copy_from_url(index,croppiediv,mode,url) {
 		});
 }
 
+function set_watched(obj,videoid) {
+		var newvalue = false;
+		if($(obj).hasClass('glyphicon-eye-open')) {
+			$(obj).addClass('glyphicon-eye-close')
+			$(obj).removeClass('glyphicon-eye-open')
+		} else {
+			newvalue = true;
+			$(obj).addClass('glyphicon-eye-open');
+			$(obj).removeClass('glyphicon-eye-close')
+		}
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/mythmngBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "set_watched",
+				state: 	 newvalue, 
+				videoid: videoid
+				},
+		success: function( response ) {
+			var text = "";
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(response.error) {
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}			
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+	
+}
 
+function global_reset() {
+  $('#divmsg').empty();
+  $('#divout').empty();
+  $('#divdeb').empty();
+  $('#freetxt').val("");
+  $('#movies4page').selectpicker('val', '20');
+  $('#ordered').selectpicker('val', '0');
+  $('#nocover').selectpicker('val', '0');
+  $('#nofanart').selectpicker('val', '0');
+  $('#watched').selectpicker('val', '0');
+  $('#director').selectpicker('val', '');
+  $('#studio').selectpicker('val', '');
+  $('#title_in').val("");
+  $('#plot_in').val("");
+  $('#year_from').val("");
+  $('#year_to').val("");
+  $('#genre_and').html('Almeno un genere');
+  $('.debug-mode').html('Debug OFF');
+  $('#ascdesc').html('Decrescente');
+  debug 		= false;
+  descending 	= false;
+  genre_and 	= false;
+  info 	= [];
+  records = [];
+  recordings = [];
+ $.each($('.genre'), function( index, value ) {
+	if($(value).hasClass("active")) {
+	  $(value).removeClass("active")
+	}	
+  }); 
+$('#page-selection').bootpag({total: 1, maxVisible: 0 });
+}
 

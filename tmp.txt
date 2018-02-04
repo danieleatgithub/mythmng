@@ -1,8 +1,0 @@
-<button type="button" class="btn dropdown-toggle btn-default" data-toggle="dropdown" role="button" title="Burger, Shake and a Smile" aria-expanded="false"><span class="filter-option pull-left">Burger, Shake and a Smile</span>&nbsp;<span class="bs-caret"><span class="caret"></span></span></button>
-
-
-
-<link rel="stylesheet" type="text/css" href="/jquery-ui-multiselect-widget-master/jquery.multiselect.css" />
-<link rel="stylesheet" type="text/css" href="/jquery-ui-multiselect-widget-master/jquery.multiselect.filter.css" />
-<script type="text/javascript" src="/jquery-ui-multiselect-widget-master/src/jquery.multiselect.js"></script>
-<script type="text/javascript" src="/jquery-ui-multiselect-widget-master/src/jquery.multiselect.filter.js"></script>

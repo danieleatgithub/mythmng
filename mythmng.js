@@ -1,38 +1,7 @@
 
 
 // reset search tab
-$('#reset').on('click', function() {
-  $('#result-'+$(this).data('target')).addClass('hide');
-  $('#freetxt').val("");
-  $('#movies4page').selectpicker('val', '20');
-  $('#ordered').selectpicker('val', '0');
-  $('#nocover').selectpicker('val', '0');
-  $('#nofanart').selectpicker('val', '0');
-  $('#watched').selectpicker('val', '0');
-  $('#director').selectpicker('val', '');
-  $('#studio').selectpicker('val', '');
-  $('#title_in').val("");
-  $('#plot_in').val("");
-  $('#year_from').val("");
-  $('#year_to').val("");
-  $('#divmsg').empty();
-  $('#divout').empty();
-  $('#divdeb').empty();
-  $('#genre_and').html('Almeno un genere');
-  $('#dbug').html('Debug OFF');
-  $('#ascdesc').html('Decrescente');
-  debug 		= false;
-  descending 	= false;
-  genre_and 	= false;
-  info 	= [];
-  records = [];
- $.each($('.genre'), function( index, value ) {
-	if($(value).hasClass("active")) {
-	  $(value).removeClass("active")
-	}	
-  }); 
-$('#page-selection').bootpag({total: 1, maxVisible: 0 });
-});
+$('#reset').on('click', global_reset);
 
 // Hide div from target
 $('.divhide').on('click', function() {
@@ -49,13 +18,6 @@ $('.divhide').on('click', function() {
   }
 });
 
- 
-$('.moviezoom').on('click', function() {
-	var index = $(this).attr('index');
-	console.log("moviezoom "+index);
- });
- 
- // view movie detail
 $('.thumbcover').on('mouseover', function() {
 	var fanart = $(this).attr('fanart');
 	if(fanart.length == 0) {
@@ -73,10 +35,10 @@ $('.thumbcover').on('mouseover', function() {
 	});	
 	$('#fanartzoom').show();
  });
+ 
 $('.thumbcover').on('mouseout', function() {
 	$('#fanartzoom').hide();
  });
- 
  
  $('#ordered').on('change', function() {
 	 if($(this).val() == 1) {
@@ -103,14 +65,11 @@ $('#genre_and').on('click', function() {
 });
 
 // debug toggler
-$('#dbug').on('click', function() {
-  debug = !debug;
-  $('#divdeb').html('');
-  if(debug == true) {
-	$('#dbug').html('Debug ON');
-  } else {
-	$('#dbug').html('Debug OFF'); 
-  }
+$('.debug-mode').on('click', function() {
+	debug = !debug;
+	$('#divdeb').html('');
+	if(debug) 	$('.debug-mode').html('Debug ON');
+	else 		$('.debug-mode').html('Debug OFF'); 
 });
 
 // ascdesc toggler
@@ -145,16 +104,16 @@ $('.thumberror').error(function(){
 
  // play movie on frontend
 $('.movieplay').on('click', function() {
- 	var idicons=$(this).parent().parent();
-	var movieview=idicons.parent().parent();
-	var index = movieview.attr('index');
+	var videoid = $(this).attr('playid');
+	var type = $(this).attr('type');
  	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/mythmngBE.php", 
 		dataType: "json", 
 		data: { 
 				request: "video_play",
-				intid: records[index]['movie']['intid']
+				id: videoid,
+				type: type
 				},
 		success: function( response ) {
 			if(response.error) {
@@ -176,35 +135,160 @@ $('.movieplay').on('click', function() {
 	});
  });
 
-// --------------------------------------------------
-// EDIT SECTION
-// --------------------------------------------------
-// Enter in edit mode
-$('.movieedit').on('click', function() { 
+
+$('.recordededit').on('click', function() { 
+	var index = $(this).attr('index');
+	// console.log(recordings);
+	var recorded = recordings[index]['recorded'];
+	var channel  = recordings[index]['channel'];
+	var screenshot = recordings[index]['screenshot'];
+	var obj = buildEditRecorded(index,recorded,channel,screenshot);
+	obj.show();
+	$("#mythentry-"+index).find("#edit").show();	
+	$("#mythentry-"+index).find("#edit").html(obj);	
+	$("#mythentry-"+index).find("#view").hide();
+ });
+$('.receditok').on('click', function() {
+	var index = $(this).attr('index');
+	var recordedid = $(this).attr('recordedid');
+	var editdiv 	= $("#mythentry-"+index).find("#edit")
+	var container 	= $("#mythentry-"+index).find("#edit").parent();
+	
+	var title 		= '';
+	var subxtitle 	= '';
+	var plot 		= '';
+	title 		= editdiv.find("#idtitle").val();
+	subtitle 	= editdiv.find("#idsubtitle").val();
+	plot 		= editdiv.find("#idplot").val();
+
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/recordedBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "set_recorded",
+				recordedid: recordedid,
+				subtitle: 	subtitle,
+				title: 		title,
+				plot: 		plot
+				},
+		success: function( response ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(response.error) {
+				$('#divmsg').html(getAlert(response.message));	
+				console.error(response.debug);
+				return;
+			}			
+			container.empty();	
+			refresh_recorded(container,recordedid,index)
+			
+		},
+		error: function( request, error ) {
+			if(debug) {
+				$('#divdeb').html(getInfo(response.debug));
+				console.error(response.debug);
+			}
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+	
+ });
+
+// Cancel 
+$('.receditabort').on('click', function() {
+	var index = $(this).attr('index');
+	var recordedid = $(this).attr('recordedid');
+	var container = $("#mythentry-"+index).find("#edit").parent();
+	container.empty();	
+	refresh_recorded(container,recordedid,index)
+});
+
+$('.fixtitle').on('click',function () {
+	var index = $(this).attr('index');
+	var recordedid = $(this).attr('recordedid');
+	var container = $("#mythentry-"+index).find("#edit").parent();
+	var titlein = container.find('#idtitle').val();	
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/recordedBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "get_titlefix",
+				title: titlein
+				},
+		success: function( response ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			if(response.error) {
+				$('#divmsg').html(getAlert(response.message));	
+				console.error(response.debug);
+				return;
+			}			
+			container.find('#idtitle').val(response.out);
+			container.find('#idtitle').css("background-color","yellow");
+			container.find("#edit").find('#ideok').show();
+
+		},
+		error: function( request, error ) {
+			if(debug) {
+				$('#divdeb').html(getInfo(response.debug));
+				console.error(response.debug);
+			}
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+	
+});
+ 
+$('.recinfo').on('click',function () {
+	var index = $(this).attr('index');
+	var recordedid = $(this).attr('recordedid');
+	var container = $("#mythentry-"+index).find("#edit").parent();
+	var titlein = container.find('#idtitle').val();	
+	$.ajax({ 
+		url: "http://www.omdbapi.com/", 
+		method: "get",
+		dataType: "jsonp", 
+		data: {"t": titlein, "apikey": "1fcb8216"},
+		success: function( response ) {
+				// console.log(response);	
+				var txt = response.Year+" "+response.Plot;
+				container.find('#idplot').val(txt)
+				container.find('#idplot').css("background-color","yellow");
+				container.find("#edit").find('#ideok').show();
+				},
+		error: function( request, error ) {
+				console.error(error);		
+		}
+	});
+	
+}); 
+ $('.movieedit').on('click', function() { 
 	var index = $(this).attr('index');
 	var movie = records[index]['movie'];
 	var cast  = records[index]['cast'];
 	var genre = records[index]['genre'];
 	var obj = buildEditMovieRecord(index,movie,cast,genre);
 	obj.show();
-	$("#movie-"+index).find("#edit").show();	
-	$("#movie-"+index).find("#edit").html(obj);	
-	$("#movie-"+index).find("#view").hide();
+	$("#mythentry-"+index).find("#edit").show();	
+	$("#mythentry-"+index).find("#edit").html(obj);	
+	$("#mythentry-"+index).find("#view").hide();
  });
-
+ 
 // Save changes 
 $('.editok').on('click', function() {
 	var index = $(this).attr('index');
 	var videoid = $(this).attr('videoid');
-	var moviecontainer = $("#movie-"+index).find("#edit").parent();
-	var editdiv 	= $("#movie-"+index).find("#edit")
+	var moviecontainer = $("#mythentry-"+index).find("#edit").parent();
+	var editdiv 	= $("#mythentry-"+index).find("#edit")
 	var year 		= editdiv.find("#idyear").val();
 	var title 		= editdiv.find("#idtitle").val();
 	var plot 		= editdiv.find("#idplot").val();
 	var director 	= editdiv.find("#eddirector").val();
+	var studio 		= editdiv.find("#edstudio").val();
 	var coverfile	= editdiv.find("#idcover").attr('coverfile');
 	var fanart_url	= editdiv.find("#idcover").attr('fanart');
 	var fanart 		=    fanart_url.split('/').pop();
+
 
 	$.when( $.ajax({ 
 		type: "POST",
@@ -216,6 +300,7 @@ $('.editok').on('click', function() {
 				year: year,
 				title: title,
 				director: director,
+				studio: studio,
 				plot: plot,
 				coverfile: coverfile,
 				fanart: fanart
@@ -277,7 +362,7 @@ $('.editok').on('click', function() {
 $('.editabort').on('click', function() {
 	var index = $(this).attr('index');
 	var videoid = $(this).attr('videoid');
-	var moviecontainer = $("#movie-"+index).find("#edit").parent();
+	var moviecontainer = $("#mythentry-"+index).find("#edit").parent();
 	moviecontainer.empty();	
 	refresh_video(moviecontainer,videoid,index)
 });
@@ -285,11 +370,11 @@ $('.editabort').on('click', function() {
 // Element is edited 
 $('.editbox').on('change', function() {
 	var index = $(this).attr('index');
-	var editdiv = $("#movie-"+index).find("#edit")
+	var editdiv = $("#mythentry-"+index).find("#edit")
 	$(this).css("background-color","yellow");
 	editdiv.find('#ideok').show();
 });
- 
+
 $('#moddirector').on('hide.bs.modal', function (event) {
   var button = $(document.activeElement);
   var modal  = $(this)
@@ -306,9 +391,65 @@ $('#moddirector').on('hide.bs.modal', function (event) {
   }
 });
 
-// ********************************************
-// cover edit
+$('#modstudio').on('hide.bs.modal', function (event) {
+  var button = $(document.activeElement);
+  var modal  = $(this)
+  if (button.is('.save')) {
+	var index = modal.attr('index');	  
+	var newstudio = modal.find('#studio-name').val();
+	var edstudio	= $('#movieedit-'+index).find('#edstudio');
+	edstudio.append(newstudio);
+	edstudio.append("<option value='"+newstudio+"'>"+newstudio+"</option>");
+	edstudio.selectpicker('refresh');
+	edstudio.selectpicker('val',newstudio);
+	edstudio.selectpicker('refresh');
+	edstudio.trigger('change');
+  }
+});
 
+$('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
+  var target = $(e.target).attr("href") // activated tab
+  global_reset();
+ 	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/recordedBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "get_recorded",
+				spare: 0
+				},
+		success: function( response ) {
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));			
+				console.error(response.debug);
+				return;
+			}			
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			recordings = JSON.parse(response.out);
+			// Build record
+			$('#divout').append('<div class="container-fluid ltab">');
+			for(var i=0; i<response.count; i++) {
+				var recorded = recordings[i]['recorded'];
+				var channel = recordings[i]['channel'];
+				var screenshot = recordings[i]['screenshot'];
+				// console.log(recorded);
+				var obj = buildViewRecorded(i,recorded,channel,screenshot);
+				$('#divout').append(obj);
+			}
+			$('#divout').append('</div>');			
+		},
+		error: function( request, error ) {
+			if(debug) {
+				$('#divdeb').html(getInfo(response.debug));
+				console.error(response.debug);
+			}
+			$('#divmsg').html(getAlert(error));			
+		},
+	});
+});
 
-
+$('a[data-item="recordered"]').on('hide.bs.tab', function (e) {
+  global_reset();
+});
 

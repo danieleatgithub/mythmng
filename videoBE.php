@@ -17,14 +17,16 @@ require_once(dirname(__FILE__) . "/utilities.php");
 $out = "";
 $error = "";
 $debug = "";
+// default error
+$response_array['error']=true;
+$response_array['count'] = 0;
+$response_array['debug'] = "";							
+$response_array['out'] 	 = "";
+$response_array['message']	 = "";	
 
 /* check connection */
-$mysqli = new mysqli($_db['ip'], $_db['user'], $_db['password'], "mythconverg");
+$mysqli = new mysqli($_mythmng['ip'], $_mythmng['user'], $_mythmng['password'], "mythconverg");
 if ($mysqli->connect_errno) { 
-	$response_array['error']=true;
-	$response_array['count'] = 0;
-	$response_array['out'] = "";
-	$response_array['debug']="";							
 	$response_array['message'] = $mysqli->connect_errno;	
 	header('Content-type: application/json');
 	echo json_encode($response_array);		
@@ -33,17 +35,7 @@ if ($mysqli->connect_errno) {
 $mysqli->set_charset("utf8");
 
 $query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';";
-if(!$mysqli->query($query)) {
-	$response_array['error']=true;
-	$response_array['count'] = 0;
-	$response_array['out'] = "";
-	$response_array['debug']=$query;							
-	$response_array['message'] = $mysqli->error;	
-	header('Content-type: application/json');
-	echo json_encode($response_array);		
-	exit(); 
-	
-}
+if(!$mysqli->query($query)) _exit_on_query_error($response_array,$mysqli->error,$query);
 
 
 $query = "";
@@ -119,7 +111,7 @@ if(sizeof($videoid) > 0 ) {
 
 // Query for movies without genre (AND mode and NO GENRE)
 if(strlen($query) == 0 && isset($_POST['genre_and']) && $_POST['genre_and'] == 'true' && (!isset($_POST['genre']) || sizeof($_POST['genre']) == 0)) {
-	
+	// FIXME: errata o incompleta
 	if(isset($_POST['watched'])) {
 		if($_POST['watched'] == "1") $where = " AND videometadata.watched = FALSE ";
 		if($_POST['watched'] == "2") $where = " AND videometadata.watched = TRUE ";
@@ -180,7 +172,10 @@ if(strlen($query) == 0 && isset($_POST['genre'])) {
 	$where .= ") ";
 	if(strlen($title)) $where .= " AND videometadata.title LIKE '%".$title."%' ";
 	if(strlen($director)) $where .= " AND videometadata.director LIKE '%".$director."%' ";
-	if(strlen($studio)) $where .= " AND videometadata.studio LIKE '%".$studio."%' ";
+	if(strlen($studio)) {
+		if($studio == "Assente") $where .= " AND ( videometadata.studio = '' OR  videometadata.studio is null )";
+		else 					 $where .= " AND videometadata.studio LIKE '%".$studio."%' "; 
+	}
 	if(strlen($plot)) $where .= " AND videometadata.plot LIKE '%".$plot."%' ";
 	$where .= " GROUP BY videometadata.intid ";
 	$query = "SELECT DISTINCT videometadata.*, videometadatagenre.* FROM ".
@@ -212,7 +207,11 @@ if(strlen($query) == 0 && !isset($_POST['genre']) ) {
 	}
 	if(strlen($title)) array_push($conditions," videometadata.title LIKE '%".$title."%' ");	
 	if(strlen($director)) array_push($conditions," videometadata.director LIKE '%".$director."%' ");
-	if(strlen($studio)) array_push($conditions," videometadata.studio LIKE '%".$studio."%' ");
+	if(strlen($studio)) 
+	if(strlen($studio)) {
+		if($studio == "Assente") array_push($conditions," ( videometadata.studio = '' OR  videometadata.studio is null )");
+		else 					 array_push($conditions," videometadata.studio LIKE '%".$studio."%' "); 
+	}
 	if(strlen($plot)) array_push($conditions," videometadata.plot LIKE '%".$plot."%' ");
 
 	if(!empty($conditions)) {
@@ -249,14 +248,7 @@ $movie = array();
 if($res = $mysqli->query($query)) {
 	$totalmovies = $res->num_rows;
 } else {
-	$response_array['error']=true;
-	$response_array['count'] = 0;
-	$response_array['out'] = "";
-	$response_array['debug']=$debug;							
-	$response_array['message'] = $mysqli->error;	
-	header('Content-type: application/json');
-	echo json_encode($response_array);	
-	exit;
+		_exit_on_query_error($response_array,$mysqli->error,$query);
 }
 
 if($res = $mysqli->query($query. $limit)) {
@@ -279,11 +271,11 @@ if($res = $mysqli->query($query. $limit)) {
 		$row['studio']  	= htmlentities($row['studio']);
 		array_push($movie,$row);
 		$cover = pathinfo($row['coverfile']);
-		$thumbfile = $_fs['thumbnail'].$cover['filename'].'.jpg';
-		$coverfile = $_fs['coverart'].$row['coverfile'];
+		$thumbfile = $_mythmng['www'].$_mythmng['thumbnail'].$cover['filename'].'.jpg';
+		$coverfile = $_mythmng['www'].$_mythmng['coverart'].$row['coverfile'];
 		if(!file_exists($thumbfile) && file_exists($coverfile) && !is_dir($coverfile)) {
 			generate_image_thumbnail($coverfile, $thumbfile);
-			$debug .= "<br>Generated thumbnail:".$thumbfile." from:".$_fs['coverart'].$row['coverfile']."";				
+			$debug .= "<br>Generated thumbnail:".$thumbfile." from:".$_mythmng['www'].$_mythmng['coverart'].$row['coverfile']."";				
 		}		
 		//trigger_error ($row['plot'],E_USER_NOTICE);
 	}
@@ -299,6 +291,8 @@ if($res = $mysqli->query($query. $limit)) {
 				$row['cast'] 		= htmlentities($row['cast']);
 				array_push($cast,$row['cast']);
 			}
+		} else {
+			_exit_on_query_error($response_array,$mysqli->error,$query);
 		}
 		$query = "select distinct videogenre.genre from videogenre join videometadatagenre on videogenre.intid = videometadatagenre.idgenre where videometadatagenre.idvideo = ".$m['intid'];
 		if($res = $mysqli->query($query)) {
@@ -307,6 +301,8 @@ if($res = $mysqli->query($query. $limit)) {
 				$row['genre'] 		= htmlentities($row['genre']);
 				array_push($genre,$row['genre']);
 			}
+		} else {
+			_exit_on_query_error($response_array,$mysqli->error,$query);
 		}
 		
 		
@@ -327,14 +323,7 @@ if($res = $mysqli->query($query. $limit)) {
 	echo json_encode($response_array);	
 	exit;
 } else {
-	$response_array['error']=true;
-	$response_array['count'] = 0;
-	$response_array['out'] = "";
-	$response_array['debug']=$debug;							
-	$response_array['message'] = $mysqli->error;	
-	header('Content-type: application/json');
-	echo json_encode($response_array);	
-	exit;
+		_exit_on_query_error($response_array,$mysqli->error,$query);
 }
 exit;
 

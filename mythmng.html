@@ -27,7 +27,7 @@
 	<div class="container-fluid " id="maintab" >
 		<div class="row">
 			<div class="col-md-12">
-			<!-- Nav tabs -->
+<!-- Nav tabs -->
 				<div class="card">
 					<ul class="nav nav-tabs" role="tablist">
 						<li role="presentation" class="mythtab active">
@@ -37,7 +37,7 @@
 							<a href="#search" aria-controls="search" role="tab" data-toggle="tab">Ricerca Video</a>
 						</li>
 						<li role="presentation" class="mythtab ">
-							<a href="#recordered" aria-controls="recordered" role="tab" data-toggle="tab">Registrazioni</a>
+							<a href="#recordered" aria-controls="recordered" data-item="recordered" role="tab" data-toggle="tab">Registrazioni</a>
 						</li>
 						<li role="presentation" class="mythtab ">
 							<a href="#usb" aria-controls="usb" role="tab" data-toggle="tab">USB</a>
@@ -46,7 +46,7 @@
 							<a href="#test" aria-controls="test" role="tab" data-toggle="tab">Manutenzione</a>
 						</li>
 					</ul>
-					<!-- Tab panes -->
+<!-- Tab panes -->
 					<div class="tab-content">
 						<!-- Tab home -->
 						<div role="tabpanel" class="tab-pane active" id="home">
@@ -134,7 +134,7 @@
 				<div class='row'>
 					<div class='btn-group paddedbtn'>
 						<button type="button" id="reset" class='btn btn-info 	onbarbtn'>Reset</button>
-						<button type="button" id="dbug" class='btn btn-primary onbarbtn '>Debug OFF</button>
+						<button type="button" class='btn btn-primary debug-mode onbarbtn '>Debug OFF</button>
 						<button type="button" id="viewbtn" class='btn btn-success onbarbtn'>Visualizza</button>
 					</div>
 				</div>						
@@ -144,7 +144,7 @@
 </nav>
 <center><div id="page-selection"></div></center>
 						</div>
-						<!-- Tab custom -->
+<!-- Tab USB -->
 						<div role="tabpanel" class="tab-pane" id="usb">
 							<div class='row'>
 								<button class='btn btn-warning ' >USB path</button>
@@ -154,7 +154,7 @@
 								<div class='row'>
 									<div class="col-md-12">
 										<div class='btn-group paddedbtn'>
-											<button class='btn btn-primary onbarbtn dbug'>Debug OFF</button>
+											<button class='btn btn-primary onbarbtn debug-mode'>Debug OFF</button>
 											<button class='btn btn-success onbarbtn ckspace'>Controlla spazio</button>
 											<button class='btn btn-success onbarbtn cresh'>Crea script</button>
 										</div>
@@ -162,8 +162,8 @@
 								</div>						
 							</div>
 						</div>
-						<!-- Tab test -->
-						<div role="tabpanel" class="tab-pane" id="test">
+<!-- Tab system -->
+						<div role="tabpanel" class="tab-pane" id="system">
 							<div class='row'>
 								<div class='commanddiv'>						
 									<div class='row'>
@@ -180,22 +180,21 @@
 								</div>
 							</div>
 						</div>
-						<!-- Tab xxxx -->
+<!-- Tab recordered -->
 						<div role="tabpanel" class="tab-pane" id="recordered">
 							<div class='row'>
 								<div class='commanddiv'>						
 									<div class='row'>
 										<div class="col-md-12">
 											<div class='btn-group paddedbtn'>
-												<button class='btn btn-primary onbarbtn dbug'>Debug OFF</button>
-												<button class='btn btn-success onbarbtn Refresh'>Aggiorna</button>
-												<button class='btn btn-success onbarbtn Refresh'>Raccogli trama</button>
+												<button class='btn btn-primary onbarbtn debug-mode'>Debug OFF</button>
 											</div>
 										</div>
 									</div>						
 								</div>
 							</div>
 						</div>
+						
 					</div>
 				</div>
 			</div>
@@ -216,10 +215,10 @@
 	</div>
 </div>	
 
-
+<!-- movie edit template -->
 <div id="movieedit-t" style="background-color: PaleGoldenRod;  display:none;" >
 	<form class="navbar-form navbar-left" style="background-color: PaleGoldenRod; width:100%;" role="form">
-		<div class="form-group" style="margin-top:5px; margin-bottom:5px;">
+		<div class="form-group" style="margin-top:5px; margin-bottom:5px;background-color: PaleGoldenRod; width:100%;">
 			<div class="row" >
 				<div class="col-xs-2 col-md-1">
 					<div class="thumbnail" id="coveredit"><img id="idcover" class="thumberror thumbcover" alt="No image"/></div>
@@ -231,12 +230,12 @@
 					<div class="row">
 						<span id="ideabort" class="glyphicon glyphicon-remove editabort" aria-hidden="true" />
 					</div>
-				<div class="row">
-						<span id="idefanart" class="glyphicon glyphicon-camera editfanart" data-toggle="modal" data-target="#coverfanart" data-imagename="" data-mode="fanart" data-placement="right" title="Carica fanart"/>
-				</div>
-				<div class="row">
-						<span id="idecover" class="glyphicon glyphicon-film editcover" data-toggle="modal" data-target="#coverfanart" data-index="" data-imagename="" data-mode="cover" data-placement="right" title="Carica cover" />
-				</div>
+					<div class="row">
+							<span id="idefanart" class="glyphicon glyphicon-camera" data-toggle="modal" data-target="#coverfanart" data-imagename="" data-mode="fanart" data-placement="right" title="Carica fanart"/>
+					</div>
+					<div class="row">
+							<span id="idecover" class="glyphicon glyphicon-film" data-toggle="modal" data-target="#coverfanart" data-index="" data-imagename="" data-mode="cover" data-placement="right" title="Carica cover" />
+					</div>
 				</div>
 				<div id="upload-cover" class="croppie-container"></div>
 				<div id="editdivbox">
@@ -248,7 +247,11 @@
 						<label class="control-label" for="eddirector">Regista</label>
 						<select id="eddirector"  class="editbox" data-width="auto" data-live-search="true"></select>
 						<button type="button" id="adddirector" class='btn btn-default ' data-toggle="modal" data-target="#moddirector" data-id="">Nuovo Regista</button>
+						<label class="control-label" for="edstudio">Studio</label>
+						<select id="edstudio"  class="editbox" data-width="auto" data-live-search="true"></select>
+						<button type="button" id="addstudio" class='btn btn-default ' data-toggle="modal" data-target="#modstudio" data-id="">Nuovo Studio</button>
 						<div/>
+						<div id="ediconbox"></div>
 						<span class="glyphicon glyphicon-triangle-bottom divhide" targetdiv="idgenre"  aria-hidden="true" ></span>
 						<label class="control-label" for="idgenre">Genere</label>
 						<div id="idgenre" class="btn-toolbar" role="toolbar"></div>
@@ -265,7 +268,6 @@
 	</form>
 </div>
 
-
 <!-- movie view template -->
 <div id="movie-t" style="display:none;" >
 	<div class="row" id="view">
@@ -274,17 +276,15 @@
 		</div>
 		<div id="idicons" class="col-xs-05">
 			<div class="row">
-				<span id="idzoom" class="glyphicon glyphicon glyphicon-zoom-in moviezoom" aria-hidden="true" />
+				<span id="idedit" class="glyphicon glyphicon-pencil movieedit" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Edit"/>
 			</div>
 			<div class="row">
-				<span id="idedit" class="glyphicon glyphicon glyphicon-pencil movieedit" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Edit"/>
-			</div>
-			<div class="row">
-				<span id="idplay" class="glyphicon glyphicon glyphicon glyphicon-play movieplay" "aria-hidden="true" data-toggle="tooltip" data-placement="right" title="TV play" />
+				<span id="idplay" class="glyphicon glyphicon-play movieplay" "aria-hidden="true" data-toggle="tooltip" data-placement="right" playid="" type="video" title="TV play" />
 			</div>
 		</div>
 		<div class="col-xs-15">
-				<div id="idtitle" class="movie-title"></div>
+				<span id="idtitle" class="movie-title"></span>
+				<span id="iconbox"></span>
 				<br>
 				<div id="iddetails"></div>
 				<div id="idplot" class="movie-plot"></div>
@@ -319,6 +319,30 @@
   </div>
 </div>	
 
+<!-- modal studio  -->
+<div class="modal fade" id="modstudio" tabindex="-1" role="dialog" aria-labelledby="modstudioLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modstudioLabel">Nuovo Studio</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="studio-name" class="col-form-label">Studio:</label>
+            <input type="text" class="form-control" id="studio-name">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" >Cancel</button>
+        <button type="button" class="btn btn-primary save" data-dismiss="modal" >Ok</button>
+      </div>
+    </div>
+  </div>
+</div>	
 
 <!-- modal coverfanart  -->
 <div class="modal fade" id="coverfanart" tabindex="-1" role="dialog" aria-labelledby="moddirectorLabel" aria-hidden="true">
@@ -351,6 +375,73 @@
 		</div>
 	</div>
 </div>
+
+<!-- recorded view template -->
+<div id="recorded-t" style="display:none;" >
+	<div class="row" id="view">
+		<div class="col-xs-2 col-md-1">
+			<div class="thumbnail"><img id="idrshoot" class="thumberror thumbcover" fanart="" alt="No image"></div>
+		</div>
+		<div id="idicons" class="col-xs-05">
+			<div class="row">
+				<span id="idredit" class="glyphicon glyphicon-pencil recordededit" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Edit"/>
+			</div>
+			<div class="row">
+				<span id="idrplay" class="glyphicon glyphicon-play movieplay" "aria-hidden="true" data-toggle="tooltip" data-placement="right" playid="" type="recorded" title="TV play" />
+			</div>
+		</div>
+		<div class="col-xs-15">
+				<span id="idrtitle" class="movie-title"></span>
+				<span id="idriconbox"></span>
+				<br>
+				<div id="idrdetails"></div>
+				<div id="idrsubtitle"></div>
+				<div id="idrdescription" class="movie-plot"></div>
+		</div>
+	</div>
+	<div class="row" id="edit"></div>
+</div>
+
+<!-- recorded edit template -->
+<div id="recordededit-t" style="background-color: PaleGoldenRod;  display:none;" >
+	<form class="navbar-form navbar-left" style="background-color: PaleGoldenRod; width:100%;" role="form">
+		<div class="form-group" style="margin-top:5px; margin-bottom:5px;background-color: PaleGoldenRod; width:100%;">
+			<div class="row" >
+				<div class="col-xs-2 col-md-1">
+					<div class="thumbnail" id="coveredit"><img id="idcover" class="thumberror thumbcover" alt="No image"/></div>
+				</div>
+				<div id="idediticons" class="col-xs-05">
+					<div class="row">
+						<span id="ideok" class="glyphicon glyphicon-ok receditok" aria-hidden="true" style="display:none;"/>
+					</div>
+					<div class="row">
+						<span id="ideabort" class="glyphicon glyphicon-remove receditabort" aria-hidden="true" />
+					</div>
+					<div class="row">
+							<span id="idfixtitle" class="glyphicon glyphicon-asterisk fixtitle" data-placement="right" title="Normalizza titolo"/>
+					</div>
+					<div class="row">
+							<span id="idrecinfo" class="glyphicon glyphicon-globe recinfo"  data-placement="right" title="Raccogli info" />
+					</div>
+				</div>
+				<div id="editdivbox">
+					<div class="col-md-10">
+						<label class="control-label" for="idtitle">Titolo</label>
+						<input id='idtitle' class="form-control input-sm editbox" style="width:60%" value=''></input>
+						<div/>
+						<label class="control-label" for="idsubtitle">Sottotitolo</label>
+						<input id='idsubtitle' class="form-control input-sm editbox" style="width:60%" value=''></input>
+						<div/>
+						<div id="ediconbox"></div>
+						<textarea id="idplot" class="form-control editbox" style="width:100%; resize:vertical"></textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+
 
 
 <link rel="stylesheet" type="text/css" href="/mythmng/navpanel.css" rel="stylesheet">
