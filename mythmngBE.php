@@ -139,6 +139,7 @@ if($_POST['request'] == "get_info") {
 			} else _exit_on_query_error($response_array,$mysqli->error,$query);
 			
 			$rout['genre'] = $genre;
+			$rout['apikey'] = $_mythmng['apikey'];
 			$response_array['error']	= false;
 			$response_array['count'] 	= $cnt;
 			$response_array['out'] 		= json_encode($rout);

@@ -47,19 +47,20 @@ if(!$mysqli->query($query)) _exit_on_query_error($response_array,$mysqli->error,
 if($_POST['request'] == "get_recorded") {
 
 	$query = "";
-	$page = 1;
+	$quiet = "-really-quiet";
 	$debug = "";
 	$title = "";
 	$description = "";
 	$recordings=array();
 	$order = "";
 	
+	if(isset($_POST['debug']) && $_POST['debug'] == "true" ) $quiet = "";
 	
 	if(isset($_POST['recordedid'])) {
 		$recordedid = $_POST['recordedid'];
-		$query = "SELECT DISTINCT recorded.* FROM recorded where recordedid=".$recordedid."";				
+		$query = "SELECT recorded.* FROM recorded where recordedid=".$recordedid."";				
 	} else {
-		$query = "SELECT DISTINCT recorded.* FROM recorded where recgroup='Default' ORDER BY recorded.starttime DESC";	
+		$query = "SELECT recorded.* FROM recorded where recgroup='Default' ORDER BY recorded.starttime DESC";	
 	}
 	
 	if($res = $mysqli->query($query)) {
@@ -111,7 +112,9 @@ if($_POST['request'] == "get_recorded") {
 						break;
 					}
 				}
-				shell_exec('export MPLAYER_HOME='.$_mythmng['www'].'/recorded_shoot; /usr/bin/mplayer -really-quiet -ss 00:18:00  -vo png:outdir='.$_mythmng['www'].'/recorded_shoot/:prefix='.$recorded['recordedid'].' -vf scale=640:360 -frames 1 -nosound '.$fullpath);
+				$cmd='export MPLAYER_HOME='.$_mythmng['www'].'/recorded_shoot; /usr/bin/mplayer -nolirc '.$quiet.' -ss 00:18:00  -vo png:outdir='.$_mythmng['www'].'/recorded_shoot/:prefix='.$recorded['recordedid'].' -vf scale=640:360 -frames 1 -nosound '.$fullpath;
+				// trigger_error($cmd,E_USER_NOTICE);
+				shell_exec($cmd);
 			}
 			$item['recorded'] = $recorded;
 			$item['screenshot'] = '/recorded_shoot/'.$shoot.'.png';
@@ -120,7 +123,7 @@ if($_POST['request'] == "get_recorded") {
 		}
 				
 		$response_array['error']=false;
-		$response_array['count'] = count($recorded);
+		$response_array['count'] = count($rout);
 		$response_array['out'] = json_encode($rout);
 		$response_array['debug']= $debug;							
 		$response_array['message'] = "Found ".$totalrecorded." recording";	
@@ -187,7 +190,6 @@ if($_POST['request'] == "get_titlefix") {
 	header('Content-type: application/json');
 	echo json_encode($response_array);	
 	exit;
-
 }
 
 // Unknown request

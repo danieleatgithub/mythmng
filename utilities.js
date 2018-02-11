@@ -10,6 +10,37 @@ function getSuccess(txt) {
 var msg = "<div class='alert alert-success  fade in'><a href='#' class='close' data-dismiss='alert'>&times;</a><strong>Success!</strong> "+txt+"</div>";
 return(msg);
 }
+
+/*
+	data.severity [high|medium|low] Level of alert
+	data.type	Type of checked
+	data.items  array of data specific element found
+*/
+function getFixable(title,type,data) {
+	var text = '';
+	if(data.items.length == 0) return({});
+	var obj=$("#alertcheck-t").clone(true,true).attr('id', 'alertcheck-'+ type).insertAfter("#alertcheck-t");
+	text = title + " Elementi riparabili: "+ data.items.length;
+	
+	obj.find('#titlealert').html(text);
+	if(data.severity == 'high') 	obj.addClass('alert-danger');
+	if(data.severity == 'medium') 	obj.addClass('alert-warning');
+	if(data.severity == 'low') 		obj.addClass('alert-info');
+	obj.find('button[data-item="fixme"]').attr('type',type);
+	obj.find('button[data-item="details"]').attr('type',type);
+	obj.find('#divdetails').empty();
+	obj.find('#divdetails').hide();
+	data.items.forEach(function (entry) {
+		obj.find('#divdetails').append('<br>'+entry);
+	});
+	
+	obj.show();
+return(obj);
+}
+
+
+
+
 function disableAllTabs() {
   $.each($('.mythtab'), function( index, value ) {
 	if(!$(value).hasClass("active")) {

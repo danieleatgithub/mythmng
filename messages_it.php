@@ -7,5 +7,7 @@ $msg['globals_2']="
 	\$_db['user']='utente db';
 	\$_db['password']='password';
 	?>";
+$msg['fixable_1']="Totale anomalie riparabili:";
+$msg['noanomalies_1']="Nessuna anomalia rilevata";
 	
 ?>

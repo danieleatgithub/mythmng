@@ -2,7 +2,11 @@
 
 // reset search tab
 $('#reset').on('click', global_reset);
-
+$('#clear').on('click', function() {
+  $('#divmsg').empty();
+  $('#divout').empty();
+  $('#divdeb').empty();
+});
 // Hide div from target
 $('.divhide').on('click', function() {
 	var parentdiv=$(this).parent();
@@ -47,6 +51,7 @@ $('.thumbcover').on('mouseout', function() {
 	 }
  });
 
+ 
 $('#page-selection').bootpag({
             total: 1,
 			maxVisible: 0,
@@ -82,6 +87,29 @@ $('#ascdesc').on('click', function() {
   }
 });
 
+
+$('#idcheckmode').on('click', function() {
+	// console.log($(this).val());
+	if($(this).val() == 0) {
+	  $(this).val('1');
+	  $(this).html('Controllo completo');
+	} else {
+	  $(this).val('0');
+	  $(this).html('Controllo Normale');
+	}	
+});
+$('#checkdetails').on('click', function() {
+	// console.log($(this).val());
+	if($(this).val() == 0) {
+	  $(this).val('1');
+	  $(this).html('Nascondi Dettagli');
+	  $(this).parent().find('#divdetails').show();
+	} else {
+	  $(this).val('0');
+	  $(this).html('Vedi Dettagli');
+	  $(this).parent().find('#divdetails').hide();
+	}	
+});
 // genre toggler
 $('.genre').on('click', function() {
 	var id=$(this).attr("name");
@@ -248,7 +276,10 @@ $('.recinfo').on('click',function () {
 		url: "http://www.omdbapi.com/", 
 		method: "get",
 		dataType: "jsonp", 
-		data: {"t": titlein, "apikey": "1fcb8216"},
+		data: {
+			"t": titlein, 
+			"apikey": apikey
+			},
 		success: function( response ) {
 				// console.log(response);	
 				var txt = response.Year+" "+response.Plot;
@@ -407,8 +438,53 @@ $('#modstudio').on('hide.bs.modal', function (event) {
   }
 });
 
+$('#check_integrity').on('click', function () {
+		var full_mode = false;
+		if($('#idcheckmode').val() == 1) full_mode = true;
+		$.ajax({ 
+			type: "POST",
+			url: "/mythmng/systemBE.php",
+			dataType: "json", 
+			data: { 
+					request: "integrity",
+					full_mode: full_mode,
+					type: 'all',
+					fix_mode: false
+				  },
+			success: function( response ) {
+				if(response.error) {
+					$('#homeout').html("<pre>"+response.out+"</pre>");
+					$('#divmsg').html(getAlert(response.message));	
+					return;
+				}		
+				$('#divout').empty();
+				$('#divdeb').empty();
+				$('#divmsg').empty();
+				var out = JSON.parse(response.out);
+				var msg = response.message;
+				if(out.summary.total_anomalies>0) msg += out.summary.total_anomalies;
+				
+				$('#divmsg').html(getSuccess(msg));	
+				if(debug) $('#divdeb').html(getInfo(response.debug));
+
+				$('#divout').append(getFixable('Genere associato a video non esistente ','videogenre_orphan',out.videogenre_orphan));				
+				$('#divout').append(getFixable('Genere non usato ','unused_genre',out.unused_genre));
+				$('#divout').append(getFixable('Cover non esistente ','cover_not_exists',out.cover_not_exists));
+				$('#divout').append(getFixable('Cover non usata ','cover_not_used',out.cover_not_used));
+						
+			},
+			error: function( request, error ) {
+				if(debug) $('#divdeb').html(getInfo(response.debug));
+				$('#divmsg').html(getAlert(error));			
+			}
+		});
+});
+	
+
+
 $('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
   var target = $(e.target).attr("href") // activated tab
+  var savedebug = debug;
   global_reset();
  	$.ajax({ 
 		type: "POST",
@@ -416,7 +492,7 @@ $('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
 		dataType: "json", 
 		data: { 
 				request: "get_recorded",
-				spare: 0
+				debug: savedebug
 				},
 		success: function( response ) {
 			if(response.error) {
@@ -452,4 +528,60 @@ $('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
 $('a[data-item="recordered"]').on('hide.bs.tab', function (e) {
   global_reset();
 });
+
+$('button[data-item="fixme"]').on('click', function () {
+	var full_mode = false;
+	if($('#idcheckmode').val() == 1) full_mode = true;
+	var type = $(this).attr('type');
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/systemBE.php",
+		dataType: "json", 
+		data: { 
+				request: "integrity",
+				full_mode: full_mode,
+				type: type,
+				fix_mode: true
+			  },
+		success: function( response ) {
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}		
+			$('#divdeb').empty();
+			$('#divmsg').empty();
+			var out = JSON.parse(response.out);
+
+			$('#divmsg').html(getInfo(response.message+out.summary.total_anomalies));	
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+				
+			// $('#divout').append(getFixable('Genere associato a video non esistente ','videogenre_orphan',out.videogenre_orphan));				
+			// $('#divout').append(getFixable('Genere non usato ','unused_genre',out.unused_genre));
+			// $('#divout').append(getFixable('Cover non esistente ','cover_not_exists',out.cover_not_exists));
+			// $('#divout').append(getFixable('Cover non usata ','cover_not_used',out.cover_not_used));
+					
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

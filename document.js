@@ -5,7 +5,7 @@ var info 			= [];
 var records 		= [];
 var recordings 		= []; 
 var genre_strings 	= [];
-
+var apikey			= '';
 
 $(document).ready(function() {
 	var genre = [];
@@ -125,8 +125,10 @@ $(document).ready(function() {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			info = JSON.parse(response.out);
 			// console.log(info);
-			$('#homeleft').append("Totale video: "+info['cnt_video']);
+			$('#homeleft').append("<a href='/mythweb/'>Mythtv</a>");
+			$('#homeleft').append("<br>Totale video: "+info['cnt_video']);
 			$('#homeleft').append("<br>Totale registrazioni: "+info['cnt_recorded']);
+			apikey = info['apikey'];
 			var colors = palette('rainbow', info['genre'].length);
 			var data_set 	= [];
 			var data_labels = [];

@@ -43,7 +43,7 @@
 							<a href="#usb" aria-controls="usb" role="tab" data-toggle="tab">USB</a>
 						</li>
 						<li role="presentation" class="mythtab ">
-							<a href="#test" aria-controls="test" role="tab" data-toggle="tab">Manutenzione</a>
+							<a href="#system" aria-controls="system" role="tab" data-toggle="tab">Manutenzione</a>
 						</li>
 					</ul>
 <!-- Tab panes -->
@@ -169,9 +169,11 @@
 									<div class='row'>
 										<div class="col-md-12">
 											<div class='btn-group paddedbtn'>
-												<button class='btn btn-primary onbarbtn'>Debug OFF</button>
-												<button class='btn btn-success onbarbtn'>Controlla congruenza DB</button>
-												<button class='btn btn-success onbarbtn'>Controlla immagini orfane</button>
+												<button class='btn btn-primary onbarbtn debug-mode'>Debug OFF</button>
+												<button id="clear" class='btn btn-primary onbarbtn'>Clear</button>
+												<button id="idcheckmode" class='btn btn-primary onbarbtn' value='0'>Controllo Normale</button>
+												<button id="check_integrity" class='btn btn-success onbarbtn'>Esegui Controllo integrita</button>
+												<button class='btn btn-success onbarbtn'>Cancella caches</button>
 												<button class='btn btn-success onbarbtn'>Backup DB</button>
 												<button class='btn btn-success onbarbtn'>Backup completo</button>
 											</div>
@@ -441,6 +443,14 @@
 	</form>
 </div>
 
+<!-- check alert template -->
+<div id='alertcheck-t' class='alert fade in' style="display:none;">
+	<button class='btn btn-success onbarbtn 'data-item='fixme'>Ripara</button>
+	<button id='checkdetails' class='btn btn-success onbarbtn' data-item='details' value='0'>Vedi Dettagli</button>
+	<a href='#' class='close' data-dismiss='alert'>&times;</a>
+	<span id='titlealert'></span>
+	<div id='divdetails'></div>
+</div>";
 
 
 

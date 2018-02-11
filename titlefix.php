@@ -1,11 +1,13 @@
 <?php
 function titlefix($title,$channel=false) {
-	$title = preg_replace('/ - PRIMA TV/','',$title);
-	$title = preg_replace('/ - PrimaTv/','',$title);
+	$title = preg_replace('/- PRIMA TV/','',$title);
+	$title = preg_replace('/- PrimaTv/','',$title);
+	$title = preg_replace('/- Prima TV/','',$title);
 	$title = preg_replace('/PrimaTv/','',$title);
+	$title = preg_replace('/- 1\^TV/','',$title);
+	
 	$title = preg_replace('/^FILM /','',$title);
 	$title = preg_replace("/^Ciclo Cosi' italiani:/",'',$title);
-	$title = preg_replace('/- 1\^TV/','',$title);
 	$title = preg_replace('/Rewind - Binario Cinema: /','',$title);
 	$title = preg_replace('/ - CONTEMPORANEO ITALIANO/','',$title);
 	$title = preg_replace("/ - VISIONI D'AUTORE/",'',$title);
