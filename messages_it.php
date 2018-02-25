@@ -9,5 +9,6 @@ $msg['globals_2']="
 	?>";
 $msg['fixable_1']="Totale anomalie riparabili:";
 $msg['noanomalies_1']="Nessuna anomalia rilevata";
+$msg['clearcache_1']="Files eliminati:";
 	
 ?>

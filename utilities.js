@@ -257,6 +257,30 @@ function buildEditRecorded(id,recorded,channel,screenshot) {
 	return(obj);
 }
 
+function buildBackup(id,backup) {
+	var text = '';
+	// console.log(backup);
+	var obj=$("#backup-t").clone(true,true).attr('id', 'backup-'+ id).insertAfter("#backup-t");
+	
+	obj.attr('index',id);
+	text = backup.name + "Tipo:" + backup.info.type;	
+	obj.find('#description').html(text);
+	
+	if(backup.info.type == 'all') 	obj.addClass('alert-danger');
+	if(backup.info.type == 'db') 	obj.addClass('alert-warning');
+	
+	obj.find('button[data-item="download"]').attr('name',backup.name);
+	obj.find('button[data-item="delete"]').attr('name',backup.name);
+	obj.find('#divdetails').empty();
+	obj.find('#divdetails').hide();
+	// data.items.forEach(function (entry) {
+		// obj.find('#divdetails').append('<br>'+entry);
+	// });
+	
+	obj.show();
+	return(obj);
+}
+
 function edit_genre() {
 	// console.log(this);
 	var genreid=$(this).attr('genreid');
@@ -337,14 +361,15 @@ function refresh_video(container,videoid,index) {
 }
 
 function refresh_recorded(container,recordedid,index) {
-		
+		var savedebug = debug;
 		$.ajax({ 
 		type: "POST",
 		url: "/mythmng/recordedBE.php", 
 		dataType: "json", 
 		data: {
-				request:		'get_recorded',
-				recordedid:		recordedid
+				request:	'get_recorded',
+				debug: 		savedebug,
+				recordedid:	recordedid
 				},
 		success: function( response ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
@@ -442,6 +467,102 @@ function view_page(page) {
 			console.error("view_page "+page+" error");
 		}
     });
+}
+
+
+
+function view_recorded(page) {
+  var savedebug = debug;
+  var recorded4page = 20;
+  $('#divout').empty();
+ 	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/recordedBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "get_recorded",
+				debug: savedebug,
+				page: page,
+				recorded4page: recorded4page
+				},
+		success: function( response ) {
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));			
+				$('#page-recorded').bootpag({total: 0 });
+				console.error(response.debug);
+				return;
+			}			
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			recordings = JSON.parse(response.out);
+			var totpages = Math.ceil(response.count/recorded4page);
+			// Build record
+			$('#divmsg').html(getSuccess(response.message+ " (Pagina "+page+" di "+totpages+")"));
+			$('#divout').append('<div class="container-fluid ltab">');
+			for(var i=0; i<recordings.length; i++) {
+				var recorded = recordings[i]['recorded'];
+				var channel = recordings[i]['channel'];
+				var screenshot = recordings[i]['screenshot'];
+				// console.log(recorded);
+				var obj = buildViewRecorded(i,recorded,channel,screenshot);
+				$('#divout').append(obj);
+			}
+			$('#page-recorded').bootpag({total: totpages, maxVisible: 20 });
+			$('#divout').append('</div>');			
+		},
+		error: function( request, error ) {
+			if(debug) {
+				$('#divdeb').html(getInfo(response.debug));
+				console.error(response.debug);
+			}
+			$('#divmsg').html(getAlert(error));			
+		},
+	});
+}
+
+function view_backup(page) {
+  var backup4page = 10;
+  var backups = [];  
+ 	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/systemBE.php", 
+		dataType: "json", 
+		data: { 
+				request: "get_backups",
+				page: page,
+				backup4page: backup4page
+				},
+		success: function( response ) {
+			//console.log(response);
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));			
+				$('#page-backup').bootpag({total: 0 });
+				console.error(response.debug);
+				return;
+			}			
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			backups = JSON.parse(response.out);
+			var totpages = Math.ceil(response.count/backup4page);
+			// Build record
+			$('#divmsg').html(getSuccess(response.message+ " (Pagina "+page+" di "+totpages+")"));
+			$('#divout').append('<div class="container-fluid ltab">');
+			for(var i=0; i<backups.length; i++) {
+				var backup = backups[i];
+				var obj = buildBackup(i,backup);
+				$('#divout').append(obj);
+			}
+			$('#page-backup').bootpag({total: totpages, maxVisible: 20 });
+			$('#divout').append('</div>');			
+		},
+		error: function( request, error ) {
+			if(debug) {
+				$('#divdeb').html(getInfo(response.debug));
+				console.error(response.debug);
+			}
+			$('#divmsg').html(getAlert(error));			
+		},
+	});
 }
 
 /*
@@ -629,5 +750,7 @@ function global_reset() {
 	}	
   }); 
 $('#page-selection').bootpag({total: 1, maxVisible: 0 });
+$('#page-recorded').bootpag({total: 1, maxVisible: 0 });
+$('#page-backup').bootpag({total: 1, maxVisible: 0 });
 }
 

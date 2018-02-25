@@ -59,6 +59,19 @@ $('#page-selection').bootpag({
 			view_page(num);
 });
 
+$('#page-recorded').bootpag({
+            total: 1,
+			maxVisible: 0,
+				}).on("page", function(event, num){
+			view_recorded(num);
+});
+
+$('#page-backup').bootpag({
+            total: 1,
+			maxVisible: 0,
+				}).on("page", function(event, num){
+			view_backup(num);
+});
 // genre_and toggler
 $('#genre_and').on('click', function() {
   genre_and = !genre_and;
@@ -471,6 +484,8 @@ $('#check_integrity').on('click', function () {
 				$('#divout').append(getFixable('Genere non usato ','unused_genre',out.unused_genre));
 				$('#divout').append(getFixable('Cover non esistente ','cover_not_exists',out.cover_not_exists));
 				$('#divout').append(getFixable('Cover non usata ','cover_not_used',out.cover_not_used));
+				$('#divout').append(getFixable('Fanart non esistente ','fanart_not_exists',out.fanart_not_exists));
+				$('#divout').append(getFixable('Fanart non usata ','fanart_not_used',out.fanart_not_used));
 						
 			},
 			error: function( request, error ) {
@@ -481,51 +496,23 @@ $('#check_integrity').on('click', function () {
 });
 	
 
-
 $('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
   var target = $(e.target).attr("href") // activated tab
-  var savedebug = debug;
   global_reset();
- 	$.ajax({ 
-		type: "POST",
-		url: "/mythmng/recordedBE.php", 
-		dataType: "json", 
-		data: { 
-				request: "get_recorded",
-				debug: savedebug
-				},
-		success: function( response ) {
-			if(response.error) {
-				$('#homeout').html("<pre>"+response.out+"</pre>");
-				$('#divmsg').html(getAlert(response.message));			
-				console.error(response.debug);
-				return;
-			}			
-			if(debug) $('#divdeb').html(getInfo(response.debug));
-			recordings = JSON.parse(response.out);
-			// Build record
-			$('#divout').append('<div class="container-fluid ltab">');
-			for(var i=0; i<response.count; i++) {
-				var recorded = recordings[i]['recorded'];
-				var channel = recordings[i]['channel'];
-				var screenshot = recordings[i]['screenshot'];
-				// console.log(recorded);
-				var obj = buildViewRecorded(i,recorded,channel,screenshot);
-				$('#divout').append(obj);
-			}
-			$('#divout').append('</div>');			
-		},
-		error: function( request, error ) {
-			if(debug) {
-				$('#divdeb').html(getInfo(response.debug));
-				console.error(response.debug);
-			}
-			$('#divmsg').html(getAlert(error));			
-		},
-	});
+  view_recorded(1);
 });
 
 $('a[data-item="recordered"]').on('hide.bs.tab', function (e) {
+  global_reset();
+});
+
+$('a[data-item="maintenace"]').on('shown.bs.tab', function (e) {
+  var target = $(e.target).attr("href") // activated tab
+  global_reset();
+  view_backup(1);
+});
+
+$('a[data-item="maintenace"]').on('hide.bs.tab', function (e) {
   global_reset();
 });
 
@@ -555,12 +542,7 @@ $('button[data-item="fixme"]').on('click', function () {
 
 			$('#divmsg').html(getInfo(response.message+out.summary.total_anomalies));	
 			if(debug) $('#divdeb').html(getInfo(response.debug));
-				
-			// $('#divout').append(getFixable('Genere associato a video non esistente ','videogenre_orphan',out.videogenre_orphan));				
-			// $('#divout').append(getFixable('Genere non usato ','unused_genre',out.unused_genre));
-			// $('#divout').append(getFixable('Cover non esistente ','cover_not_exists',out.cover_not_exists));
-			// $('#divout').append(getFixable('Cover non usata ','cover_not_used',out.cover_not_used));
-					
+									
 		},
 		error: function( request, error ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
@@ -570,9 +552,74 @@ $('button[data-item="fixme"]').on('click', function () {
 
 });
 
+$('#clearcache').on('click', function() {
+	var full_mode = false;
+	if($('#idcheckmode').val() == 1) full_mode = true;
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/systemBE.php",
+		dataType: "json", 
+		data: { 
+				request: "clear_cache",
+				full_mode: full_mode
+			  },
+		success: function( response ) {
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}		
+			$('#divdeb').empty();
+			$('#divmsg').empty();
+			var out = JSON.parse(response.out);
+
+			$('#divmsg').html(getInfo(response.message+out.total));	
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+									
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+	
+});
 
 
+$('.bkpbutton').on('click', function() {
+	var type = $(this).val();
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/systemBE.php",
+		dataType: "json", 
+		data: { 
+				request: "backup",
+				type: type
+			  },
+		success: function( response ) {
+			console.log(response);
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}		
+			$('#divdeb').empty();
+			$('#divmsg').empty();
+			var out = JSON.parse(response.out);
 
+			$('#divmsg').html(getInfo(response.message));	
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+									
+		},
+		progress: function (e) {
+			console.log(e);
+		},
+		error: function( request, error ) {
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+	
+});
 
 
 

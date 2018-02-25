@@ -45,6 +45,8 @@ $query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE
 if(!$mysqli->query($query)) _exit_on_query_error($response_array,$mysqli->error,$query);
 
 if($_POST['request'] == "get_recorded") {
+	if(!isset($_POST['debug'])) _exit_on_parameter_error($response_array);
+	if(!isset($_POST['recordedid']) && (!isset($_POST['recorded4page']) || !isset($_POST['page'])))	_exit_on_parameter_error($response_array);
 
 	$query = "";
 	$quiet = "-really-quiet";
@@ -53,18 +55,31 @@ if($_POST['request'] == "get_recorded") {
 	$description = "";
 	$recordings=array();
 	$order = "";
+	$recorded4page 	= 999;
+	$page 			= 1;
 	
-	if(isset($_POST['debug']) && $_POST['debug'] == "true" ) $quiet = "";
+	
+	if($_POST['debug'] == "true") $quiet = "";
 	
 	if(isset($_POST['recordedid'])) {
 		$recordedid = $_POST['recordedid'];
 		$query = "SELECT recorded.* FROM recorded where recordedid=".$recordedid."";				
+		$limit = "";
 	} else {
+		$recorded4page = $_POST['recorded4page'];
+		$page = $_POST['page'];
 		$query = "SELECT recorded.* FROM recorded where recgroup='Default' ORDER BY recorded.starttime DESC";	
+		$limit = " LIMIT ".($recorded4page * ($page - 1)).",".$recorded4page;
+	}
+	if($res = $mysqli->query($query)) {
+		$totalrecorded = $res->num_rows;
+	} else {
+		_exit_on_query_error($response_array,$mysqli->error,$query);
 	}
 	
+	$query .= $limit;
+	
 	if($res = $mysqli->query($query)) {
-		
 		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
 			// trigger_error ($row['plot'],E_USER_NOTICE);
 			
@@ -81,7 +96,6 @@ if($_POST['request'] == "get_recorded") {
 			
 			array_push($recordings,$row);
 		}
-		$totalrecorded = count($recordings);
 		foreach($recordings as $recorded) {
 			$item['recorded'] = array();
 			$item['screenshot'] = '';
@@ -123,7 +137,7 @@ if($_POST['request'] == "get_recorded") {
 		}
 				
 		$response_array['error']=false;
-		$response_array['count'] = count($rout);
+		$response_array['count'] = $totalrecorded;
 		$response_array['out'] = json_encode($rout);
 		$response_array['debug']= $debug;							
 		$response_array['message'] = "Found ".$totalrecorded." recording";	

@@ -13,6 +13,7 @@ if(!file_exists(dirname(__FILE__) . "/globals.php")) {
 require_once(dirname(__FILE__) . "/globals.php");
 require_once(dirname(__FILE__) . "/utilities.php");
 
+set_time_limit(90);
 
 $out = "";
 $error = "";
