@@ -486,6 +486,8 @@ $('#check_integrity').on('click', function () {
 				$('#divout').append(getFixable('Cover non usata ','cover_not_used',out.cover_not_used));
 				$('#divout').append(getFixable('Fanart non esistente ','fanart_not_exists',out.fanart_not_exists));
 				$('#divout').append(getFixable('Fanart non usata ','fanart_not_used',out.fanart_not_used));
+				$('#divout').append(getFixable('Video non usato ','video_not_used',out.video_not_used));
+				$('#divout').append(getFixable('Video non esistente ','video_not_exists',out.video_not_exists));
 						
 			},
 			error: function( request, error ) {

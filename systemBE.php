@@ -83,6 +83,16 @@ if($_POST['request'] == "integrity") {
 		$fixable += 	count($rout['videogenre_orphan']['items']);
 		$debug .= $rout['videogenre_orphan']['debug'];
 	}
+	if($type == 'all' || $type == 'video_not_used' ) {
+		$rout['video_not_used'] = check_video_not_used($mysqli,$full_mode,$response_array,$fix_mode);
+		$fixable += 	count($rout['video_not_used']['items']);
+		$debug .= $rout['video_not_used']['debug'];
+	}
+	if($type == 'all' || $type == 'video_not_exists' ) {
+		$rout['video_not_exists'] = check_video_not_exists($mysqli,$full_mode,$response_array,$fix_mode);
+		$fixable += 	count($rout['video_not_exists']['items']);
+		$debug .= $rout['video_not_exists']['debug'];
+	}
 	
 	// TODO esistenza video
 	// TODO 
@@ -381,6 +391,86 @@ function check_cover_not_used($mysqli,$full_mode,$response_array,$fix_mode) {
 
 	return($ret_array);
 }
+
+function check_video_not_used($mysqli,$full_mode,$response_array,$fix_mode) {
+	global $_mythmng;
+	$ret_array = array();
+	$video_not_used = array();
+	$storage=array();
+
+	$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Videos"';
+	if($res = $mysqli->query($query)) {
+		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+			array_push($storage,$row['dirname']);
+		}
+	} else {
+		_exit_on_query_error($response_array,$mysqli->error,$query);
+	}
+	$fullpath = "";
+	foreach($storage as $dir) {
+		$files=scandir($dir);	
+		foreach($files as $file) {
+			if(in_array($file,array(".",".."))) continue;		
+			$query = "select  videometadata.intid from videometadata where videometadata.filename='".$file."'";
+			if($res = $mysqli->query($query)) {
+				if($mysqli->affected_rows == 0) {
+					array_push($video_not_used,"delete ".$dir."/".$file);
+					if($fix_mode) unlink($dir."/".$file); 
+				}
+			}
+		}
+	}
+	$ret_array['severity'] = 'high';
+	$ret_array['items'] = $video_not_used;
+	$ret_array['debug'] = '';
+
+	return($ret_array);
+}
+
+function check_video_not_exists($mysqli,$full_mode,$response_array,$fix_mode) {
+	global $_mythmng;
+	$ret_array = array();
+	$video_not_exists = array();
+	$storage=array();
+
+	$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Videos"';
+	if($res = $mysqli->query($query)) {
+		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+			array_push($storage,$row['dirname']);
+		}
+	} else {
+		_exit_on_query_error($response_array,$mysqli->error,$query);
+	}
+	
+	$query = "select  videometadata.filename from videometadata";
+	if($res = $mysqli->query($query)) {
+		if($mysqli->affected_rows > 0) {
+			while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+				$video_found = false;
+				foreach($storage as $dir) {
+					if(file_exists($dir . "/" . $row['filename'])) {
+						$video_found = true;
+						break;
+					}
+				}
+				if($video_found == false) {
+					array_push($video_not_exists,$row['filename']);
+					if($fix_mode) {
+						// TODO delete record
+					}					
+				}
+			}
+		}
+	}
+
+	$ret_array['severity'] = 'high';
+	$ret_array['items'] = $video_not_exists;
+	$ret_array['debug'] = '';
+
+	return($ret_array);
+}
+
+
 function check_fanart_not_used($mysqli,$full_mode,$response_array,$fix_mode) {
 	global $_mythmng;
 	$ret_array = array();
