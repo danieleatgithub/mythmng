@@ -169,6 +169,6 @@ $(document).ready(function() {
     });
 
 	// FIXME: wait promise
-	$.getScript("/mythmng/mythmng.js");
-	$.getScript("/mythmng/coverfanart.js");
+	//$.getScript("/mythmng/mythmng.js");
+	//$.getScript("/mythmng/coverfanart.js");
  }); 

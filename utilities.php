@@ -43,6 +43,15 @@ function generate_image_thumbnail($source_image_path, $thumbnail_image_path)
 }
 
 
+function _exit_on_error($response,$message) {
+		$text = $_POST['request']." ".$message;
+		trigger_error ($text,E_USER_NOTICE);
+		$response['message'] = $text;	
+		$response['debug'] = print_r($_POST,true);	
+		header('Content-type: application/json');
+		echo json_encode($response);		
+		exit(); 	
+}
 
 function _exit_on_parameter_error($response) {
 		$text = $_POST['request']." missed parameters ";
@@ -54,6 +63,7 @@ function _exit_on_parameter_error($response) {
 		exit(); 	
 }
 
+
 function _exit_on_query_error($response,$error,$query) {
 		$text = $_POST['request']." query error ".$error;
 		trigger_error($text,E_USER_NOTICE);
@@ -64,6 +74,13 @@ function _exit_on_query_error($response,$error,$query) {
 		exit(); 	
 }
 
-
+function removeDirectory($path) {
+ 	$files = glob($path . '/*');
+	foreach ($files as $file) {
+		is_dir($file) ? removeDirectory($file) : unlink($file);
+	}
+	rmdir($path);
+ 	return;
+}
 
 ?>

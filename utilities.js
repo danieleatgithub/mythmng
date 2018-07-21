@@ -269,8 +269,8 @@ function buildBackup(id,backup) {
 	if(backup.info.type == 'all') 	obj.addClass('alert-danger');
 	if(backup.info.type == 'db') 	obj.addClass('alert-warning');
 	
-	obj.find('button[data-item="download"]').attr('name',backup.name);
-	obj.find('button[data-item="delete"]').attr('name',backup.name);
+	obj.find('button[data-item="bkpdownload"]').attr('name',backup.name);
+	obj.find('button[data-item="bkpdelete"]').attr('name',backup.name);
 	obj.find('#divdetails').empty();
 	obj.find('#divdetails').hide();
 	// data.items.forEach(function (entry) {
@@ -533,7 +533,7 @@ function view_backup(page) {
 				backup4page: backup4page
 				},
 		success: function( response ) {
-			//console.log(response);
+			console.log(response);
 			if(response.error) {
 				$('#homeout').html("<pre>"+response.out+"</pre>");
 				$('#divmsg').html(getAlert(response.message));			
@@ -545,6 +545,7 @@ function view_backup(page) {
 			backups = JSON.parse(response.out);
 			var totpages = Math.ceil(response.count/backup4page);
 			// Build record
+			$('#divout').empty();
 			$('#divmsg').html(getSuccess(response.message+ " (Pagina "+page+" di "+totpages+")"));
 			$('#divout').append('<div class="container-fluid ltab">');
 			for(var i=0; i<backups.length; i++) {
@@ -552,7 +553,7 @@ function view_backup(page) {
 				var obj = buildBackup(i,backup);
 				$('#divout').append(obj);
 			}
-			$('#page-backup').bootpag({total: totpages, maxVisible: 20 });
+			$('#page-backup').bootpag({total: totpages, maxVisible: 10 });
 			$('#divout').append('</div>');			
 		},
 		error: function( request, error ) {

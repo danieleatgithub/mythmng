@@ -194,7 +194,12 @@ success_backup:
 }
 
 if($_POST['request'] == "get_backups") {
-	if(!isset($_POST['page'])||!isset($_POST['backup4page'])) _exit_on_parameter_error($response_array);
+	if(!isset($_POST['page'])||!isset($_POST['backup4page'])) _exit_on_parameter_error($response_array);	
+	$backup4page = intval($_POST['backup4page']);
+	$offset 	 = (intval($_POST['page'])-1) * $backup4page;
+	if($backup4page <= 0 || $offset < 0) _exit_on_parameter_error($response_array);
+	
+	$rout_full = array();
 	$dir = $_mythmng['www'].$_mythmng['backup'];
 	$files=scandir($dir);	
 	foreach($files as $file) {
@@ -210,13 +215,18 @@ if($_POST['request'] == "get_backups") {
 			$debug .= $dir.$file."/info.json";
 			$backup['broken'] = true;			
 		}
-		array_push($rout,$backup);
+		array_push($rout_full,$backup);
 	}
-	usort($rout,'backup_sort');
+	usort($rout_full,'backup_sort');
+	$rout = array_slice($rout_full,$offset,$backup4page);
+	$debug .= print_r($rout_full,true);
+	$debug .= print_r($rout,true);
+	$debug .= "<br>offset=" . $offset. " backup4page=".$backup4page . " count($rout)=".count($rout);
 
+	
 success_get_backups:
 	$response_array['out'] = json_encode($rout);
-	$response_array['count'] = count($rout);	
+	$response_array['count'] = count($rout_full);	
 	$response_array['message']="";
 	$response_array['error']=$error;
 	$response_array['debug']=$debug;
@@ -225,6 +235,37 @@ success_get_backups:
 	exit;
 
 }
+
+if($_POST['request'] == "del_backup") {
+	if(!isset($_POST['name'])) _exit_on_parameter_error($response_array);	
+	$name   = $_POST['name'];
+	if($name == "" || $name == "." || $name == ".." ) _exit_on_parameter_error($response_array);
+	$target = $_mythmng['www'].$_mythmng['backup']. $name;
+	$debug .= $target;
+	
+	if(!is_dir($target) || !file_exists($target."/info.json") ) _exit_on_error($response_array,$target." is not a backup");
+	$backup_info = json_decode(file_get_contents($target."/info.json"));
+	removeDirectory($target);
+	if(is_dir($target)) {
+		$error 	 = true;
+		$message = " [".$target."] Delete failed";
+	} else {
+		$message = " [".$target."] Deleted";
+		array_push($rout,$backup_info);
+	}
+	
+success_set_backup:
+	$response_array['out'] = json_encode($rout);
+	$response_array['count'] = count($rout);	
+	$response_array['message']=$message;
+	$response_array['error']=$error;
+	$response_array['debug']=$debug;
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
+
+}
+
 
 // Unknown request
 $response_array['error']=true;
@@ -240,8 +281,8 @@ function backup_sort($a,$b) {
 	global $_mythmng;
 	$dir = $_mythmng['www'].$_mythmng['backup'];
 	// Sort on creation time if exists or change time for old or broken backups	
-	if(array_key_exists("time",$a['info']) && array_key_exists("time",$b['info'])) return($a['info']->time > $b['info']->time);
-	return(filemtime($dir.$a['name']) > filemtime($dir.$b['name']));
+	if(array_key_exists("time",$a['info']) && array_key_exists("time",$b['info'])) return($a['info']->time < $b['info']->time);
+	return(filemtime($dir.$a['name']) < filemtime($dir.$b['name']));
 }
 
 
