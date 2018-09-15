@@ -266,7 +266,42 @@ success_set_backup:
 
 }
 
+if($_POST['request'] == "dwl_backup") {
+	if(!isset($_POST['name'])) _exit_on_parameter_error($response_array);	
+	$name   = $_POST['name'];
+	if($name == "" || $name == "." || $name == ".." ) _exit_on_parameter_error($response_array);
+	$backup = $_mythmng['www'].$_mythmng['backup']. $name;
+	$target = $_mythmng['www'].$_mythmng['tmp']. $name. ".zip";
+	$debug .= $backup ." ". $target;
+	
+	if(!is_dir($backup) || !file_exists($backup."/info.json") ) _exit_on_error($response_array,$target." is not a backup");
+	if(file_exists($target) ) unlink($target);
+	$backup_info = json_decode(file_get_contents($backup."/info.json"));
+	$zip = new ZipArchive();
+	$ret = $zip->open($target, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+	if ($ret !== TRUE) {
+		$error 	 = true;
+		$message = " [".$target."] zip failed" . $ret;
+	} else {
+		$options = array('add_path' => $backup, 'remove_all_path' => FALSE);
+		$zip->addGlob('*', GLOB_BRACE, $options);
+		$zip->close();
+		$message = " [".$_mythmng['tmp']. $name. ".zip";
+		$rout['info'] = $backup_info;
+		$rout['zip']  = $_mythmng['tmp']. $name. ".zip";
+	}
+	
+success_dwl_backup:
+	$response_array['out'] = json_encode($rout);
+	$response_array['count'] = count($rout);	
+	$response_array['message']=$message;
+	$response_array['error']=$error;
+	$response_array['debug']=$debug;
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
 
+}
 // Unknown request
 $response_array['error']=true;
 $response_array['count'] = 0;

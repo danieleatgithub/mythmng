@@ -587,10 +587,35 @@ $('button[data-item="bkpdelete"]').on('click', function () {
 });
 
 $('button[data-item="bkpdownload"]').on('click', function () {
-	var full_mode = false;
-	if($('#idcheckmode').val() == 1) full_mode = true;
 	var name = $(this).attr('name');
-	alert(name);
+	var row  = $(this).parent();
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/systemBE.php",
+		dataType: "json", 
+		data: { 
+				request: "dwl_backup",
+				name: name
+			  },
+		success: function( response ) {
+			if(response.error) {
+				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}		
+			$('#divdeb').empty();
+			$('#divmsg').empty();
+			var out = JSON.parse(response.out);
+
+			$('#divmsg').html(getInfo(response.message));	
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			row.hide();						
+		},
+		error: function( request, error ) {
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
 });
 
 
