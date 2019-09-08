@@ -393,7 +393,6 @@ function refresh_recorded(container,recordedid,index) {
 
 }
 
-
 // class viewbtn
 function view_page(page) {
    var ordered 		= $('#ordered').val();
@@ -468,8 +467,6 @@ function view_page(page) {
 		}
     });
 }
-
-
 
 function view_recorded(page) {
   var savedebug = debug;

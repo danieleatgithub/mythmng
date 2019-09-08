@@ -51,7 +51,6 @@ $('.thumbcover').on('mouseout', function() {
 	 }
  });
 
- 
 $('#page-selection').bootpag({
             total: 1,
 			maxVisible: 0,
@@ -100,7 +99,6 @@ $('#ascdesc').on('click', function() {
   }
 });
 
-
 $('#idcheckmode').on('click', function() {
 	// console.log($(this).val());
 	if($(this).val() == 0) {
@@ -111,6 +109,7 @@ $('#idcheckmode').on('click', function() {
 	  $(this).html('Controllo Normale');
 	}	
 });
+
 $('#checkdetails').on('click', function() {
 	// console.log($(this).val());
 	if($(this).val() == 0) {
@@ -176,7 +175,6 @@ $('.movieplay').on('click', function() {
 	});
  });
 
-
 $('.recordededit').on('click', function() { 
 	var index = $(this).attr('index');
 	// console.log(recordings);
@@ -189,6 +187,7 @@ $('.recordededit').on('click', function() {
 	$("#mythentry-"+index).find("#edit").html(obj);	
 	$("#mythentry-"+index).find("#view").hide();
  });
+ 
 $('.receditok').on('click', function() {
 	var index = $(this).attr('index');
 	var recordedid = $(this).attr('recordedid');
@@ -305,8 +304,9 @@ $('.recinfo').on('click',function () {
 		}
 	});
 	
-}); 
- $('.movieedit').on('click', function() { 
+});
+ 
+$('.movieedit').on('click', function() { 
 	var index = $(this).attr('index');
 	var movie = records[index]['movie'];
 	var cast  = records[index]['cast'];
@@ -497,7 +497,6 @@ $('#check_integrity').on('click', function () {
 		});
 });
 	
-
 $('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
   var target = $(e.target).attr("href") // activated tab
   global_reset();
@@ -618,7 +617,6 @@ $('button[data-item="bkpdownload"]').on('click', function () {
 	});
 });
 
-
 $('#clearcache').on('click', function() {
 	var full_mode = false;
 	if($('#idcheckmode').val() == 1) full_mode = true;
@@ -651,7 +649,6 @@ $('#clearcache').on('click', function() {
 	});
 	
 });
-
 
 $('.bkpbutton').on('click', function() {
 	var type = $(this).val();
@@ -688,7 +685,41 @@ $('.bkpbutton').on('click', function() {
 	
 });
 
-
+$('#id_mythfill').on('click', function() {
+	var type = $(this).val();
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/systemBE.php",
+		dataType: "json", 
+		data: { 
+				request: "mythfilldatabase",
+				type: type,
+                action: "start"
+			  },
+		success: function( response ) {
+			console.log(response);
+			if(response.error) {
+//				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}		
+			$('#divdeb').empty();
+			$('#divmsg').empty();
+			var out = JSON.parse(response.out);
+			$('#divmsg').html(getInfo(response.message));
+            
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+									
+		},
+		progress: function (e) {
+			console.log(e);
+		},
+		error: function( request, error ) {
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+	
+});
 
 
 
