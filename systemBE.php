@@ -223,8 +223,6 @@ if($_POST['request'] == "get_backups") {
 	$debug .= print_r($rout,true);
 	$debug .= "<br>offset=" . $offset. " backup4page=".$backup4page . " count($rout)=".count($rout);
 
-	
-success_get_backups:
 	$response_array['out'] = json_encode($rout);
 	$response_array['count'] = count($rout_full);	
 	$response_array['message']="";
@@ -254,7 +252,6 @@ if($_POST['request'] == "del_backup") {
 		array_push($rout,$backup_info);
 	}
 	
-success_set_backup:
 	$response_array['out'] = json_encode($rout);
 	$response_array['count'] = count($rout);	
 	$response_array['message']=$message;
@@ -290,8 +287,7 @@ if($_POST['request'] == "dwl_backup") {
 		$rout['info'] = $backup_info;
 		$rout['zip']  = $_mythmng['tmp']. $name. ".zip";
 	}
-	
-success_dwl_backup:
+
 	$response_array['out'] = json_encode($rout);
 	$response_array['count'] = count($rout);	
 	$response_array['message']=$message;
@@ -302,6 +298,47 @@ success_dwl_backup:
 	exit;
 
 }
+
+if($_POST['request'] == "mythfilldatabase") {
+	if(!isset($_POST['action'])) _exit_on_parameter_error($response_array);	
+	$action   = $_POST['action'];
+	if(!in_array($action,array("start","status"))) _exit_on_parameter_error($response_array);
+    
+    $error = true;     
+	$log_file = $_mythmng['www'].$_mythmng['local_log']. "mythfilldatabase.log";
+	$pid_file = $_mythmng['www'].$_mythmng['local_log']. "mythfilldatabase.pid";
+    $log_link = '<a href="'.$_mythmng['local_log'].'mythfilldatabase.log" > See mythfilldatabase log</a>';
+    $cmd_status = "ps aux | /bin/grep mythfilldatabase | /bin/grep -v grep";
+    
+    $raw_text = shell_exec($cmd_status);
+    if(empty($raw_text))  $is_running=0;
+    else                  $is_running=1;
+    
+    if($action == "start" ) {
+        if($is_running==0 ) {
+            $cmd_start = "/usr/bin/sudo -u user /bin/sh -c 'echo $$ > ".$pid_file. "; /usr/bin/mythfilldatabase > ".$log_file. "' &";
+            $raw_text = shell_exec($cmd_start);
+            sleep(1);
+            if(empty(shell_exec($cmd_status)))  $message = "Start Failed<br>".$log_link;
+            else                                $error = false;            
+        } else {
+            $message = "Already Runnig<br>".$log_link;
+        }
+    }
+    
+	$rout['info'] = "Started<br>".$log_link;
+    
+	$response_array['out'] = json_encode($rout);
+	$response_array['count'] = count($rout);	
+	$response_array['message']=$message;
+	$response_array['error']=$error;
+	$response_array['debug']=$raw_text;
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
+
+}
+
 // Unknown request
 $response_array['error']=true;
 $response_array['count'] = 0;
@@ -311,6 +348,12 @@ $response_array['message'] = "Command [".$_POST['request']."] not implemented";
 header('Content-type: application/json');
 echo json_encode($response_array);		
 exit(); 
+// =============================================================================
+// =============================================================================
+//        END OF REQUEST
+// =============================================================================
+// =============================================================================
+
 
 function backup_sort($a,$b) {
 	global $_mythmng;
@@ -319,7 +362,6 @@ function backup_sort($a,$b) {
 	if(array_key_exists("time",$a['info']) && array_key_exists("time",$b['info'])) return($a['info']->time < $b['info']->time);
 	return(filemtime($dir.$a['name']) < filemtime($dir.$b['name']));
 }
-
 
 function check_unused_genre($mysqli,$full_mode,$response_array,$fix_mode) {
 	global $_mythmng;
@@ -363,7 +405,6 @@ function check_unused_genre($mysqli,$full_mode,$response_array,$fix_mode) {
 	return($ret_array);
 }
 
-
 function check_cover_not_exists($mysqli,$full_mode,$response_array,$fix_mode) {
 	global $_mythmng;
 	$ret_array = array();
@@ -403,7 +444,6 @@ function check_cover_not_exists($mysqli,$full_mode,$response_array,$fix_mode) {
 	return($ret_array);
 }
 
-
 function check_fanart_not_exists($mysqli,$full_mode,$response_array,$fix_mode) {
 	global $_mythmng;
 	$ret_array = array();
@@ -442,7 +482,6 @@ function check_fanart_not_exists($mysqli,$full_mode,$response_array,$fix_mode) {
 
 	return($ret_array);
 }
-
 
 function check_cover_not_used($mysqli,$full_mode,$response_array,$fix_mode) {
 	global $_mythmng;
@@ -545,7 +584,6 @@ function check_video_not_exists($mysqli,$full_mode,$response_array,$fix_mode) {
 
 	return($ret_array);
 }
-
 
 function check_fanart_not_used($mysqli,$full_mode,$response_array,$fix_mode) {
 	global $_mythmng;

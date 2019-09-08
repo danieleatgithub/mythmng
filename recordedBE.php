@@ -108,8 +108,10 @@ if($_POST['request'] == "get_recorded") {
 				$row['name'] = htmlentities($row['name']);
 				$item['channel'] = $row['name'];
 			} else _exit_on_query_error($response_array,$mysqli->error,$query);
-			$shoot = $recorded['recordedid'].'00000001';
-			if(!file_exists($_mythmng['www'].'/recorded_shoot/'.$shoot.'.png')) {
+            
+			$shoot = $recorded['recordedid'].'.jpg';
+ 			
+            if(!file_exists($_mythmng['www'].'/recorded_shoot/'.$shoot)) {
 				$storage=array();
 				$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Default"';
 				if($res = $mysqli->query($query)) {
@@ -119,19 +121,27 @@ if($_POST['request'] == "get_recorded") {
 				} else {
 					_exit_on_query_error($response_array,$mysqli->error,$query);
 				}
-				$fullpath = "";
+				$ts_srcfile = "";
 				foreach($storage as $dir) {
 					if(file_exists($dir . "/" . $recorded['basename'])) {
-						$fullpath = $dir . "/" . $recorded['basename'];
+						$ts_srcfile = $dir . "/" . $recorded['basename'];
 						break;
 					}
 				}
-				$cmd='export MPLAYER_HOME='.$_mythmng['www'].'/recorded_shoot; /usr/bin/mplayer -nolirc '.$quiet.' -ss 00:18:00  -vo png:outdir='.$_mythmng['www'].'/recorded_shoot/:prefix='.$recorded['recordedid'].' -vf scale=640:360 -frames 1 -nosound '.$fullpath;
+                
+				$cmd='export MPLAYER_HOME='.$_mythmng['www'].'/recorded_shoot;'.
+                     ' export TERM=linux; '.
+                     '/usr/bin/mplayer -nolirc '.$quiet.' -ss 00:18:00'.
+                     ' -vo jpeg:outdir='.$_mythmng['www'].'/recorded_shoot/'.
+                     ' -vf scale=640:360 -frames 1 -nosound '.$ts_srcfile;
+				$result=shell_exec($cmd);
 				// trigger_error($cmd,E_USER_NOTICE);
-				shell_exec($cmd);
+				// trigger_error($result,E_USER_NOTICE);
+                $cmd = "mv ".$_mythmng['www']."/recorded_shoot/00000001.jpg ".$_mythmng['www']."/recorded_shoot/".$shoot;               
+				$result=shell_exec($cmd);
 			}
-			$item['recorded'] = $recorded;
-			$item['screenshot'] = '/recorded_shoot/'.$shoot.'.png';
+            $item['recorded'] = $recorded;
+			$item['screenshot'] = '/recorded_shoot/'.$shoot;
 			array_push($rout,$item);
 			
 		}
