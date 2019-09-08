@@ -49,10 +49,6 @@ if(!$mysqli->query($query)) {
 	
 }
 
-
-
-
-
 if($_POST['request'] == "get_genre") {
 	$query = "SELECT * FROM videogenre ORDER by genre";
 	$mysqli->set_charset("utf8");
