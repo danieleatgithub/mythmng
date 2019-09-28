@@ -51,6 +51,44 @@ $('.thumbcover').on('mouseout', function() {
 	 }
  });
 
+$('#id_mythfill').on('click', function() {
+	var type = $(this).val();
+	$.ajax({ 
+		type: "POST",
+		url: "/mythmng/systemBE.php",
+		dataType: "json", 
+		data: { 
+				request: "mythfilldatabase",
+				type: type,
+                action: "start"
+			  },
+		success: function( response ) {
+			console.log(response);
+			if(response.error) {
+//				$('#homeout').html("<pre>"+response.out+"</pre>");
+				$('#divmsg').html(getAlert(response.message));	
+				return;
+			}		
+			$('#divdeb').empty();
+			$('#divmsg').empty();
+			var out = JSON.parse(response.out);
+			$('#divmsg').html(getInfo(response.message));
+            
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+									
+		},
+		progress: function (e) {
+			console.log(e);
+		},
+		error: function( request, error ) {
+			$('#divmsg').html(getAlert(error));			
+		}
+	});
+	
+});
+ 
+ 
+ 
 $('#page-selection').bootpag({
             total: 1,
 			maxVisible: 0,
@@ -685,41 +723,6 @@ $('.bkpbutton').on('click', function() {
 	
 });
 
-$('#id_mythfill').on('click', function() {
-	var type = $(this).val();
-	$.ajax({ 
-		type: "POST",
-		url: "/mythmng/systemBE.php",
-		dataType: "json", 
-		data: { 
-				request: "mythfilldatabase",
-				type: type,
-                action: "start"
-			  },
-		success: function( response ) {
-			console.log(response);
-			if(response.error) {
-//				$('#homeout').html("<pre>"+response.out+"</pre>");
-				$('#divmsg').html(getAlert(response.message));	
-				return;
-			}		
-			$('#divdeb').empty();
-			$('#divmsg').empty();
-			var out = JSON.parse(response.out);
-			$('#divmsg').html(getInfo(response.message));
-            
-			if(debug) $('#divdeb').html(getInfo(response.debug));
-									
-		},
-		progress: function (e) {
-			console.log(e);
-		},
-		error: function( request, error ) {
-			$('#divmsg').html(getAlert(error));			
-		}
-	});
-	
-});
 
 
 

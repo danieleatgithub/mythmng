@@ -316,11 +316,15 @@ if($_POST['request'] == "mythfilldatabase") {
     
     if($action == "start" ) {
         if($is_running==0 ) {
-            $cmd_start = "/usr/bin/sudo -u user /bin/sh -c 'echo $$ > ".$pid_file. "; /usr/bin/mythfilldatabase > ".$log_file. "' &";
+            $cmd_start = "/usr/bin/sudo -u user /bin/sh -c 'echo $$ > ".$pid_file. "; /usr/bin/mythfilldatabase > ".$log_file. " &'";
             $raw_text = shell_exec($cmd_start);
             sleep(1);
-            if(empty(shell_exec($cmd_status)))  $message = "Start Failed<br>".$log_link;
-            else                                $error = false;            
+            if(empty(shell_exec($cmd_status)))  { 
+                $message = "Start Failed<br>".$log_link;
+            } else {
+                $message = "mythfilldatabase started<br>".$log_link;
+                $error = false;    
+            }        
         } else {
             $message = "Already Runnig<br>".$log_link;
         }
