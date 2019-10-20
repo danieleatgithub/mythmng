@@ -211,7 +211,7 @@ function buildViewRecorded(id,recorded,channel,screenshot) {
 	obj.find('#idrplay').attr('playid',recorded['recordedid']);
 	obj.find('#idrtitle').html(recorded['title']);
 	obj.find('#idrsubtitle').html(recorded['subtitle']);
-	obj.find('#idrdetails').html(channel+" "+recorded['starttime']+" "+recorded['category']);
+	obj.find('#idrdetails').html(channel+" "+recorded['starttime']+" "+recorded['category']+" ["+recorded['srcfile']+"]" );
 	obj.find('#idrdescription').html(recorded['description']);
 	obj.show();
 	$('span[rel=tooltip]').tooltip();		

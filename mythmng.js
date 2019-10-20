@@ -137,14 +137,14 @@ $('#ascdesc').on('click', function() {
   }
 });
 
-$('#idcheckmode').on('click', function() {
+$('#idmode').on('click', function() {
 	// console.log($(this).val());
 	if($(this).val() == 0) {
 	  $(this).val('1');
-	  $(this).html('Controllo completo');
+	  $(this).html('Full Mode');
 	} else {
 	  $(this).val('0');
-	  $(this).html('Controllo Normale');
+	  $(this).html('Normal Mode');
 	}	
 });
 
@@ -491,7 +491,7 @@ $('#modstudio').on('hide.bs.modal', function (event) {
 
 $('#check_integrity').on('click', function () {
 		var full_mode = false;
-		if($('#idcheckmode').val() == 1) full_mode = true;
+		if($('#idmode').val() == 1) full_mode = true;
 		$.ajax({ 
 			type: "POST",
 			url: "/mythmng/systemBE.php",
@@ -557,7 +557,7 @@ $('a[data-item="maintenace"]').on('hide.bs.tab', function (e) {
 
 $('button[data-item="fixme"]').on('click', function () {
 	var full_mode = false;
-	if($('#idcheckmode').val() == 1) full_mode = true;
+	if($('#idmode').val() == 1) full_mode = true;
 	var type = $(this).attr('type');
 	$.ajax({ 
 		type: "POST",
@@ -657,7 +657,7 @@ $('button[data-item="bkpdownload"]').on('click', function () {
 
 $('#clearcache').on('click', function() {
 	var full_mode = false;
-	if($('#idcheckmode').val() == 1) full_mode = true;
+	if($('#idmode').val() == 1) full_mode = true;
 	$.ajax({ 
 		type: "POST",
 		url: "/mythmng/systemBE.php",

@@ -60,6 +60,16 @@ if($_POST['request'] == "get_recorded") {
 	
 	
 	if($_POST['debug'] == "true") $quiet = "";
+    
+    $storage=array();
+    $query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Default"';
+    if($res = $mysqli->query($query)) {
+        while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+            array_push($storage,$row['dirname']);
+        }
+    } else {
+        _exit_on_query_error($response_array,$mysqli->error,$query);
+    }
 	
 	if(isset($_POST['recordedid'])) {
 		$recordedid = $_POST['recordedid'];
@@ -96,6 +106,8 @@ if($_POST['request'] == "get_recorded") {
 			
 			array_push($recordings,$row);
 		}
+        
+                
 		foreach($recordings as $recorded) {
 			$item['recorded'] = array();
 			$item['screenshot'] = '';
@@ -111,24 +123,16 @@ if($_POST['request'] == "get_recorded") {
             
 			$shoot = $recorded['recordedid'].'.jpg';
  			
-            if(!file_exists($_mythmng['www'].'/recorded_shoot/'.$shoot)) {
-				$storage=array();
-				$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Default"';
-				if($res = $mysqli->query($query)) {
-					while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-						array_push($storage,$row['dirname']);
-					}
-				} else {
-					_exit_on_query_error($response_array,$mysqli->error,$query);
-				}
-				$ts_srcfile = "";
-				foreach($storage as $dir) {
-					if(file_exists($dir . "/" . $recorded['basename'])) {
-						$ts_srcfile = $dir . "/" . $recorded['basename'];
-						break;
-					}
-				}
+            $ts_srcfile = "";
+            foreach($storage as $dir) {
+                if(file_exists($dir . "/" . $recorded['basename'])) {
+                    $ts_srcfile = $dir . "/" . $recorded['basename'];
+                    break;
+                }
+            }
+            $recorded['srcfile'] = $ts_srcfile;
                 
+            if(!file_exists($_mythmng['www'].'/recorded_shoot/'.$shoot)) {
 				$cmd='export MPLAYER_HOME='.$_mythmng['www'].'/recorded_shoot;'.
                      ' export TERM=linux; '.
                      '/usr/bin/mplayer -nolirc '.$quiet.' -ss 00:18:00'.
