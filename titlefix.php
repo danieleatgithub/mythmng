@@ -1,5 +1,11 @@
 <?php
+require_once(dirname(__FILE__) . "/../mythuser/manipulation.php");
 function titlefix($title,$channel=false) {
+    $result= keywordReplace($title);
+    return($result);
+}
+
+function titlefix_org($title,$channel=false) {
 	$title = preg_replace('/- PRIMA TV/','',$title);
 	$title = preg_replace('/- PrimaTv/','',$title);
 	$title = preg_replace('/- Prima TV/','',$title);

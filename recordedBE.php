@@ -41,7 +41,7 @@ if ($mysqli->connect_errno) {
 	exit(); 
 }
 $mysqli->set_charset("utf8");
-$query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';";
+$query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';";
 if(!$mysqli->query($query)) _exit_on_query_error($response_array,$mysqli->error,$query);
 
 if($_POST['request'] == "get_recorded") {

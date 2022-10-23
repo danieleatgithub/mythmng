@@ -38,7 +38,8 @@ if ($mysqli->connect_errno) {
 	exit(); 
 }
 
-$query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';";
+$query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';";
+
 if(!$mysqli->query($query)) {
 	trigger_error (print_R($_POST,true),E_USER_NOTICE);
 	$response_array['debug']=$query;							

@@ -40,7 +40,7 @@ if ($mysqli->connect_errno) {
 	exit(); 
 }
 $mysqli->set_charset("utf8");
-$query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';";
+$query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';";
 if(!$mysqli->query($query)) _exit_on_query_error($response_array,$mysqli->error,$query);
 
 if($_POST['request'] == "integrity") {
@@ -217,6 +217,7 @@ if($_POST['request'] == "get_backups") {
 		}
 		array_push($rout_full,$backup);
 	}
+
 	usort($rout_full,'backup_sort');
 	$rout = array_slice($rout_full,$offset,$backup4page);
 	$debug .= print_r($rout_full,true);
@@ -316,7 +317,7 @@ if($_POST['request'] == "mythfilldatabase") {
     
     if($action == "start" ) {
         if($is_running==0 ) {
-            $cmd_start = "/usr/bin/sudo -u user /bin/sh -c 'echo $$ > ".$pid_file. "; /usr/bin/mythfilldatabase > ".$log_file. " &'";
+            $cmd_start = "/usr/bin/sudo -u mythtv /bin/sh -c 'echo $$ > ".$pid_file. "; /usr/bin/mythfilldatabase > ".$log_file. " &'";
             $raw_text = shell_exec($cmd_start);
             sleep(1);
             if(empty(shell_exec($cmd_status)))  { 
@@ -363,7 +364,11 @@ function backup_sort($a,$b) {
 	global $_mythmng;
 	$dir = $_mythmng['www'].$_mythmng['backup'];
 	// Sort on creation time if exists or change time for old or broken backups	
-	if(array_key_exists("time",$a['info']) && array_key_exists("time",$b['info'])) return($a['info']->time < $b['info']->time);
+    if(array_key_exists("info",$a) && array_key_exists("info",$b)) {
+        //$s = print_r($b,True);
+        //syslog(LOG_NOTICE,$s);
+        return($a['info']->time < $b['info']->time);
+    }
 	return(filemtime($dir.$a['name']) < filemtime($dir.$b['name']));
 }
 
