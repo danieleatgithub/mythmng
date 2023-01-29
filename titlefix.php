@@ -46,6 +46,7 @@ function titlefix_org($title,$channel=false) {
 	$title = preg_replace("/- EFFETTO NOTTE/",'',$title);
 	// $title = preg_replace('/\([A-Z. ]+\)/','',$title);
 	// $title = preg_replace("/^-/",'',$title);
+    // nop
 	$title=trim($title);
 return ($title);
 
