@@ -2,7 +2,7 @@
 
 // reset search tab
 $('#reset').on('click', global_reset);
-$('#clear').on('click', function() {
+$('.clear').on('click', function() {
   $('#divmsg').empty();
   $('#divout').empty();
   $('#divdeb').empty();
@@ -174,6 +174,10 @@ $('#viewbtn').on('click', function() {
 	view_page(1);
 });
 
+$('#view_recordings').on('click', function() {
+	view_recordings(1);
+});
+
 $('.thumberror').error(function(){
 	console.log("thumberror: "+$(this).attr('src'));
 	$(this).attr('src', '/mythmng/nopic.png');
@@ -213,6 +217,58 @@ $('.movieplay').on('click', function() {
 	});
  });
 
+  // start cutter da fare
+$('.cutter').on('click', function() {
+	var cutterid = $(this).attr('cutterid');
+	var type = $(this).attr('type');
+    console.log(cutterid)
+    console.log(type)
+	$.ajax({ 
+		type: "POST",
+        crossDomain: true,
+		url: "http://" + window.location.host + ":18800/cut_recording", 
+		dataType: "json", 
+		data: { 
+				videoid: cutterid,
+		},
+		success: function( response ) {
+			info = JSON.parse(response.out);
+			console.log(response);
+			if(debug) $('#divdeb').html(getInfo(response.debug));
+		},
+		error: function( request, error ) {
+			console.log(error);
+		}
+    });    
+// 	$.ajax({ 
+//		type: "POST",
+//		url: "/mythmng/mythmngBE.php", 
+//		dataType: "json", 
+//		data: { 
+//				request: "video_play",
+//				id: videoid,
+//				type: type
+//				},
+//		success: function( response ) {
+//			if(response.error) {
+//				$('#homeout').html("<pre>"+response.out+"</pre>");
+//				$('#divmsg').html(getAlert(response.message));			
+//				console.error(response.debug);
+//				return;
+//			}			
+//			if(debug) $('#divdeb').html(getInfo(response.debug));
+//			var result = JSON.parse(response.out);
+//		},
+//		error: function( request, error ) {
+//			if(debug) {
+//				$('#divdeb').html(getInfo(response.debug));
+//				console.error(response.debug);
+//			}
+//			$('#divmsg').html(getAlert(error));			
+//		},
+//	});
+ });
+ 
 $('.recordededit').on('click', function() { 
 	var index = $(this).attr('index');
 	// console.log(recordings);
@@ -538,7 +594,6 @@ $('#check_integrity').on('click', function () {
 $('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
   var target = $(e.target).attr("href") // activated tab
   global_reset();
-  view_recorded(1);
 });
 
 $('a[data-item="recordered"]').on('hide.bs.tab', function (e) {

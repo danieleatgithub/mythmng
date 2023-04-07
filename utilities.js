@@ -209,6 +209,7 @@ function buildViewRecorded(id,recorded,channel,screenshot) {
 	obj.find('#idrshoot').attr('fanart',screenshot);
 	obj.find('#idredit').attr('index',id);
 	obj.find('#idrplay').attr('playid',recorded['recordedid']);
+	obj.find('#idrcutter').attr('cutterid',recorded['recordedid']);
 	obj.find('#idrtitle').html(recorded['title']);
 	obj.find('#idrsubtitle').html(recorded['subtitle']);
 	obj.find('#idrdetails').html(channel+" "+recorded['starttime']+" "+recorded['category']+" ["+recorded['srcfile']+"]" );
@@ -393,6 +394,14 @@ function refresh_recorded(container,recordedid,index) {
 
 }
 
+function view_recordings(page) {
+    var cutlist		= $('#cutlist').val();
+    var title		= $('#rectitle').val();
+    var description		= $('#recdescription').val();
+    view_recorded(1,cutlist,title,description);
+}
+
+
 // class viewbtn
 function view_page(page) {
    var ordered 		= $('#ordered').val();
@@ -468,7 +477,7 @@ function view_page(page) {
     });
 }
 
-function view_recorded(page) {
+function view_recorded(page,cutlist,title,description) {
   var savedebug = debug;
   var recorded4page = 20;
   $('#divout').empty();
@@ -480,6 +489,9 @@ function view_recorded(page) {
 				request: "get_recorded",
 				debug: savedebug,
 				page: page,
+                cutlist: cutlist,
+                title: title,
+                description: description,
 				recorded4page: recorded4page
 				},
 		success: function( response ) {

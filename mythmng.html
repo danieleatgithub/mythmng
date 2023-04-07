@@ -185,7 +185,7 @@
 										<div class="col-md-12">
 											<div class='btn-group paddedbtn'>
 												<button class='btn btn-primary onbarbtn debug-mode'>Debug OFF</button>
-												<button id="clear" class='btn btn-primary onbarbtn'>Clear</button>
+												<button id="clearsys" class='btn btn-primary onbarbtn clear'>Clear</button>
 												<button id="idmode" class='btn btn-primary onbarbtn' value='0'>Normal Mode</button>
 												<button id="check_integrity" class='btn btn-success onbarbtn'>Esegui Controllo integrita</button>
 												<button id="clearcache" class='btn btn-success onbarbtn'>Cancella caches</button>
@@ -201,11 +201,25 @@
 <!-- Tab recordered -->
 						<div role="tabpanel" class="tab-pane" id="recordered">
 							<div class='row'>
+                                <label class="control-label" for="rectitle">Titolo</label>
+                                <input type="text" class="input-group input-group-md" id='rectitle' style="width:30%" value=''></input>
+                                <label class="control-label" for="recdescription">Descrizione</label>
+                                <input type="text" class="input-group input-group-md" id='recdescription' style="width:30%" value=''></input>
+                                <label class="control-label" for="cutlist">Cutlist</label>
+                                <select id="cutlist" class='selectpicker' data-width="auto">
+                                    <option value="0">Tutti</option>
+                                    <option value="1">Senza Cutpoint</option>
+                                    <option value="2">Con Cutpoint</option>
+                                </select>
+							</div>												
+							<div class='row'>
 								<div class='commanddiv'>						
 									<div class='row'>
 										<div class="col-md-12">
 											<div class='btn-group paddedbtn'>
 												<button class='btn btn-primary onbarbtn debug-mode'>Debug OFF</button>
+												<button id="clearrec" class='btn btn-primary onbarbtn clear'>Clear</button>
+                                                <button type="button" id="view_recordings" class='btn btn-success onbarbtn'>Visualizza</button>
 											</div>
 										</div>
 										<center><div id="page-recorded"></div></center>
@@ -409,6 +423,9 @@
 			</div>
 			<div class="row">
 				<span id="idrplay" class="glyphicon glyphicon-play movieplay" "aria-hidden="true" data-toggle="tooltip" data-placement="right" playid="" type="recorded" title="TV play" />
+			</div>
+			<div class="row">
+				<span id="idrcutter" class="glyphicon glyphicon-scissors cutter" "aria-hidden="true" data-toggle="tooltip" data-placement="right" cutterid="" type="cutter" title="Cutter" />
 			</div>
 		</div>
 		<div class="col-xs-15">

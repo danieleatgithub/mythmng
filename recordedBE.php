@@ -57,7 +57,7 @@ if($_POST['request'] == "get_recorded") {
 	$order = "";
 	$recorded4page 	= 999;
 	$page 			= 1;
-	
+	$and_query = "";
 	
 	if($_POST['debug'] == "true") $quiet = "";
     
@@ -70,7 +70,25 @@ if($_POST['request'] == "get_recorded") {
     } else {
         _exit_on_query_error($response_array,$mysqli->error,$query);
     }
-	
+	if(isset($_POST['cutlist'])) {
+        $cutlist = intval($_POST['cutlist']);
+        if($cutlist == 1) {
+            $and_query = " AND cutlist=0 ";
+        }
+        if($cutlist == 2) {
+            $and_query = " AND cutlist=1 ";
+        }
+    }
+	if(isset($_POST['title']) && $_POST['title'] != null) {
+        $title = $_POST['title'];
+        $and_query .= ' AND title like "%'.$title.'%" ';
+    }
+	if(isset($_POST['description']) && $_POST['description'] != null ) {
+        $pdes = $_POST['description'];
+        $and_query .= ' AND description like "%'.$pdes.'%" ';
+    }
+    
+    
 	if(isset($_POST['recordedid'])) {
 		$recordedid = $_POST['recordedid'];
 		$query = "SELECT recorded.* FROM recorded where recordedid=".$recordedid."";				
@@ -78,9 +96,10 @@ if($_POST['request'] == "get_recorded") {
 	} else {
 		$recorded4page = $_POST['recorded4page'];
 		$page = $_POST['page'];
-		$query = "SELECT recorded.* FROM recorded where recgroup='Default' ORDER BY recorded.starttime DESC";	
+		$query = "SELECT recorded.* FROM recorded where recgroup='Default' ".$and_query."ORDER BY recorded.starttime DESC";	
 		$limit = " LIMIT ".($recorded4page * ($page - 1)).",".$recorded4page;
 	}
+    $debug = $query;
 	if($res = $mysqli->query($query)) {
 		$totalrecorded = $res->num_rows;
 	} else {

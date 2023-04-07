@@ -126,9 +126,8 @@ $(document).ready(function() {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			info = JSON.parse(response.out);
 			// console.log(info);
-			$('#homeleft').append("<a href='/mythweb/'>Mythtv</a>");
+			$('#homeleft').append("<br><a href='/mythweb/'>Mythtv</a>");
 			$('#homeleft').append("<br>Totale video: "+info['cnt_video']);
-			$('#homeleft').append("<br>Totale registrazioni: "+info['cnt_recorded']);
 			apikey = info['apikey'];
 			var colors = palette('rainbow', info['genre'].length);
 			var data_set 	= [];
@@ -166,6 +165,19 @@ $(document).ready(function() {
 		error: function( request, error ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			$('#divmsg').html(getAlert(error));			
+		}
+    });
+	$.ajax({ 
+		type: "GET",
+        crossDomain: true,
+		url: "http://" + window.location.host + ":18800/info", 
+		success: function( response ) {
+			info = JSON.parse(response);
+			console.log(info);
+			$('#homeleft').append("<br>Totale registrazioni: "+info['recordings']);
+		},
+		error: function( request, error ) {
+			console.log(error);
 		}
     });
 
