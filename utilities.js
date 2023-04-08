@@ -363,6 +363,7 @@ function refresh_video(container,videoid,index) {
 
 function refresh_recorded(container,recordedid,index) {
 		var savedebug = debug;
+        console.log("start refresh_recorded")
 		$.ajax({ 
 		type: "POST",
 		url: "/mythmng/recordedBE.php", 
@@ -395,10 +396,7 @@ function refresh_recorded(container,recordedid,index) {
 }
 
 function view_recordings(page) {
-    var cutlist		= $('#cutlist').val();
-    var title		= $('#rectitle').val();
-    var description		= $('#recdescription').val();
-    view_recorded(1,cutlist,title,description);
+    view_recorded(page);
 }
 
 
@@ -477,8 +475,12 @@ function view_page(page) {
     });
 }
 
-function view_recorded(page,cutlist,title,description) {
+function view_recorded(page) {
   var savedebug = debug;
+  var cutlist   = $('#cutlist').val();
+  var title		= $('#rectitle').val();
+  var description		= $('#recdescription').val();
+  console.log("start view_recorded page=" + page + " cutlist=" + cutlist + " title=" + title)
   var recorded4page = 20;
   $('#divout').empty();
  	$.ajax({ 
@@ -730,6 +732,7 @@ function set_watched(obj,videoid) {
 }
 
 function global_reset() {
+  console.log("start global_reset")
   $('#divmsg').empty();
   $('#divout').empty();
   $('#divdeb').empty();
@@ -748,6 +751,7 @@ function global_reset() {
   $('#genre_and').html('Almeno un genere');
   $('.debug-mode').html('Debug OFF');
   $('#ascdesc').html('Decrescente');
+  $('#cutlist').selectpicker('val', '0');
   debug 		= false;
   descending 	= false;
   genre_and 	= false;

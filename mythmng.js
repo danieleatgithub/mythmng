@@ -2,6 +2,7 @@
 
 // reset search tab
 $('#reset').on('click', global_reset);
+$('#reset2').on('click', global_reset);
 $('.clear').on('click', function() {
   $('#divmsg').empty();
   $('#divout').empty();
