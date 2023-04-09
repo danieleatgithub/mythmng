@@ -343,13 +343,13 @@ $('.fixtitle').on('click',function () {
 	var recordedid = $(this).attr('recordedid');
 	var container = $("#mythentry-"+index).find("#edit").parent();
 	var titlein = container.find('#idtitle').val();	
+    console.log('start fixtitle ' + titlein)
 	$.ajax({ 
-		type: "POST",
-		url: "/mythmng/recordedBE.php", 
+		type: "GET",
+		url: "http://192.168.1.66:18800/get_cleaned_title",
 		dataType: "json", 
 		data: { 
-				request: "get_titlefix",
-				title: titlein
+				raw_title: titlein
 				},
 		success: function( response ) {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
@@ -357,8 +357,10 @@ $('.fixtitle').on('click',function () {
 				$('#divmsg').html(getAlert(response.message));	
 				console.error(response.debug);
 				return;
-			}			
-			container.find('#idtitle').val(response.out);
+			}	
+            console.log(response.out)
+            console.log(response.out.title)
+			container.find('#idtitle').val(response.out.title);
 			container.find('#idtitle').css("background-color","yellow");
 			container.find("#edit").find('#ideok').show();
 
