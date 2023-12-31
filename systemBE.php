@@ -43,6 +43,106 @@ $mysqli->set_charset("utf8");
 $query = "set session sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';";
 if(!$mysqli->query($query)) _exit_on_query_error($response_array,$mysqli->error,$query);
 
+
+
+if($_POST['request'] == "create_script") {
+	global $_mythmng;
+	$storage=array();
+	$filenames=array();
+    $videos=array();
+    $titles= array();
+    $debug = "";
+    $byte_used = 0;
+    $msg = "";
+    $cr = "<br>";
+    
+	if(!isset($_POST['usb_path']) || !isset($_POST['usb_tag']) ) _exit_on_parameter_error($response_array);
+	$usb_path = $_POST['usb_path'];
+	$usb_tag =  $_POST['usb_tag'];
+	
+    $tag_id = -1;
+    $query = 'select videogenre.intid from videogenre where videogenre.genre="' .  $usb_tag . '"';
+    $debug .= "<br>".$query;
+	
+    if($res = $mysqli->query($query)) {
+        if ($res->num_rows == 0) {
+            $response_array['error']=true;
+            $response_array['message']= "Tag " . $usb_tag . " not found";
+            goto fail_create_script;
+        }
+		$row = $res->fetch_array(MYSQLI_ASSOC);
+        $tag_id  = $row['intid'];
+	} else _exit_on_query_error($response_array,$mysqli->error,$query);
+    
+	$query = 'select  videometadata.* from videometadata join videometadatagenre on videometadatagenre.idvideo = videometadata.intid AND ( videometadatagenre.idgenre = '. $tag_id .') GROUP BY videometadata.intid ORDER BY videometadata.title';
+    $debug .= "<br>".$query;
+	if($res = $mysqli->query($query)) {
+        if($res->num_rows == 0) {
+            $response_array['message'] = 'no files';
+        } else {
+            $rout['summary']['total_files'] = $res->num_rows;
+            while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+                array_push($filenames,$row['filename']);
+                $titles[$row['filename']] = $row['title'];
+            }
+        }
+	} else _exit_on_query_error($response_array,$mysqli->error,$query);
+
+	array_push($rout,$filenames);
+
+	$query = 'select storagegroup.dirname from storagegroup where storagegroup.groupname = "Videos"';
+    $debug .= "<br>".$query;
+	if($res = $mysqli->query($query)) {
+		while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+			array_push($storage,$row['dirname']);
+		}
+	} else {
+		_exit_on_query_error($response_array,$mysqli->error,$query);
+	}
+    $script = "#!/bin/bash";
+    $script .= $cr . "#mount point " . $usb_path;
+    foreach ($filenames as $file) {
+        foreach ($storage as $path) {
+            if (file_exists($path . "/" . $file)) {
+                $video = $path . "/" . $file;
+                break;
+            }
+        }
+        if ($video == "") {
+            $msg .= "<br>Missing " . $file;
+        } else {
+            array_push($videos,$video);
+            $fsize = filesize($video);
+            $byte_used += $fsize;
+            $cp_cmd = $cr . "cp " . $video . " " . $usb_path . "/.";
+            $cp_padded = str_pad($cp_cmd,130);
+            $script .=  $cp_padded . " #" . $titles[$file] . " (" . human_filesize($fsize) . ")";
+        }        
+    } 
+
+    $rout['titles'] = $titles;
+    $rout['summary']['byte_used'] = $byte_used;
+    $rout['summary']['space_used'] = human_filesize($byte_used);
+    $script .= $cr . "#" . str_repeat("-",130);
+    $script .= $cr . "#total files=" .  $rout['summary']['total_files'];
+    $script .= $cr . "#total size=" .  $rout['summary']['space_used'];
+    $script .= $cr . "#total bytes=" .  $rout['summary']['byte_used'];
+    $script .= $cr . "";
+
+    $rout['script'] = $script;
+    
+	$response_array['error']=false;
+    $response_array['message']= $msg;
+	$response_array['out'] = json_encode($rout);
+    
+fail_create_script:
+	$response_array['debug']=$debug;    
+	header('Content-type: application/json');
+	echo json_encode($response_array);	
+	exit;
+}
+
+
 if($_POST['request'] == "integrity") {
 	if(!isset($_POST['type']) || !isset($_POST['full_mode']) || !isset($_POST['fix_mode'])) _exit_on_parameter_error($response_array);
 	$full_mode = true;
@@ -102,6 +202,7 @@ if($_POST['request'] == "integrity") {
 	else 				$response_array['message'] = $msg['fixable_1'];
 	$rout['summary']['total_anomalies'] = $fixable;
 
+    
 	$response_array['out'] = json_encode($rout);
 	$response_array['error']=false;
 	$response_array['debug']=$debug;
@@ -159,12 +260,17 @@ if($_POST['request'] == "backup") {
 	
 	if($type == 'db' || $type == 'all') {
 			$dir = $_mythmng['www'].$_mythmng['backup'].$suffix;
-			$dump_cmd = "mysqldump -u ".$_mythmng['user']." -p".$_mythmng['password']." mythconverg videometadata > ".$dir."/mythconverg-videometadata.sql";
+			$dump_cmd1 = "mysqldump -u ".$_mythmng['user']." -p".$_mythmng['password']." mythconverg videometadata > ".$dir."/mythconverg-videometadata.sql";
+			$dump_cmd2 = "mysqldump -u ".$_mythmng['user']." -p".$_mythmng['password']." mythconverg channel > ".$dir."/mythconverg-channel.sql";
 			$txt = shell_exec("mkdir ".$dir. " 2>&1");
 			if(strlen($txt) > 0 ) goto fail_backup;
-			$txt = shell_exec($dump_cmd);
+			$txt = shell_exec($dump_cmd1);
 			if(strlen($txt) > 0 ) goto fail_backup;
-			$debug .= $dump_cmd;
+			$txt = shell_exec($dump_cmd2);
+			if(strlen($txt) > 0 ) goto fail_backup;
+			$debug .= $dump_cmd1;
+			$debug .= "-----------------------";
+			$debug .= $dump_cmd2;
 	}		
 			
 			
@@ -268,7 +374,7 @@ if($_POST['request'] == "dwl_backup") {
 	if(!isset($_POST['name'])) _exit_on_parameter_error($response_array);	
 	$name   = $_POST['name'];
 	if($name == "" || $name == "." || $name == ".." ) _exit_on_parameter_error($response_array);
-	$backup = $_mythmng['www'].$_mythmng['backup']. $name;
+	$backup = $_mythmng['www'].$_mythmng['backup']. $name . "/";
 	$target = $_mythmng['www'].$_mythmng['tmp']. $name. ".zip";
 	$debug .= $backup ." ". $target;
 	
@@ -276,15 +382,15 @@ if($_POST['request'] == "dwl_backup") {
 	if(file_exists($target) ) unlink($target);
 	$backup_info = json_decode(file_get_contents($backup."/info.json"));
 	$zip = new ZipArchive();
-	$ret = $zip->open($target, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+	$ret = $zip->open($target, ZipArchive::CREATE | ZipArchive::OVERWRITE);    
 	if ($ret !== TRUE) {
 		$error 	 = true;
 		$message = " [".$target."] zip failed" . $ret;
 	} else {
-		$options = array('add_path' => $backup, 'remove_all_path' => FALSE);
-		$zip->addGlob('*', GLOB_BRACE, $options);
+		$options = array('remove_all_path' => FALSE);
+		$zip->addGlob($backup . '/*', GLOB_BRACE, $options);
 		$zip->close();
-		$message = " [".$_mythmng['tmp']. $name. ".zip";
+		$message = " [ Url: ".$_mythmng['tmp']. $name. ".zip";
 		$rout['info'] = $backup_info;
 		$rout['zip']  = $_mythmng['tmp']. $name. ".zip";
 	}
@@ -654,5 +760,10 @@ function check_videogenre_orphan($mysqli,$full_mode,$response_array,$fix_mode) {
 	
 }
 
+function human_filesize($bytes, $decimals = 2) {
+  $sz = 'BKMGTP';
+  $factor = floor((strlen($bytes) - 1) / 3);
+  return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+}
 
 ?>

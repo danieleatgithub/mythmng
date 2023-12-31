@@ -241,33 +241,6 @@ $('.cutter').on('click', function() {
 			console.log(error);
 		}
     });    
-// 	$.ajax({ 
-//		type: "POST",
-//		url: "/mythmng/mythmngBE.php", 
-//		dataType: "json", 
-//		data: { 
-//				request: "video_play",
-//				id: videoid,
-//				type: type
-//				},
-//		success: function( response ) {
-//			if(response.error) {
-//				$('#homeout').html("<pre>"+response.out+"</pre>");
-//				$('#divmsg').html(getAlert(response.message));			
-//				console.error(response.debug);
-//				return;
-//			}			
-//			if(debug) $('#divdeb').html(getInfo(response.debug));
-//			var result = JSON.parse(response.out);
-//		},
-//		error: function( request, error ) {
-//			if(debug) {
-//				$('#divdeb').html(getInfo(response.debug));
-//				console.error(response.debug);
-//			}
-//			$('#divmsg').html(getAlert(error));			
-//		},
-//	});
  });
  
 $('.recordededit').on('click', function() { 
@@ -593,6 +566,50 @@ $('#check_integrity').on('click', function () {
 			}
 		});
 });
+
+$('#create_script').on('click', function () {
+		var usb_path = $('#usb_path').val();
+		var usb_tag = $('#usb_tag').val();
+		$.ajax({ 
+			type: "POST",
+			url: "/mythmng/systemBE.php",
+			dataType: "json", 
+			data: { 
+					request: "create_script",
+					usb_path: usb_path,
+                    usb_tag: usb_tag
+				  },
+			success: function( response ) {
+				if(response.error) {
+					$('#homeout').html("<pre>"+response.out+"</pre>");
+					$('#divmsg').html(getAlert(response.message));	
+					return;
+				}		
+				$('#divout').empty();
+				$('#divdeb').empty();
+				$('#divmsg').empty();
+				var out = JSON.parse(response.out);
+				var msg = response.message;
+				if(out.summary.total_files>0) {
+                    msg += "<br>Videos:" + out.summary.total_files;
+                    msg += "Total size" + out.summary.space_used;
+                    msg += "<br><hr>" + out.titles;
+                    
+                }
+				
+				$('#divmsg').html(getSuccess(msg));	
+				if(debug) $('#divdeb').html(getInfo(response.debug));
+
+				$('#divout').append("<pre>" + out.script + "</pre>");				
+						
+			},
+			error: function( request, error ) {
+				if(debug) $('#divdeb').html(getInfo(response.debug));
+				$('#divmsg').html(getAlert(error));			
+			}
+		});
+});
+
 	
 $('a[data-item="recordered"]').on('shown.bs.tab', function (e) {
   var target = $(e.target).attr("href") // activated tab

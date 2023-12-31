@@ -163,15 +163,16 @@
 						<div role="tabpanel" class="tab-pane" id="usb">
 							<div class='row'>
 								<button class='btn btn-warning ' >USB path</button>
-								<input id='usbpath' width='80' value=''></input>
+								<input id='usb_path' width='80' value='/mnt/usb'></input>
+								<input id='usb_tag' width='80' value=''></input>
 							</div>												
 							<div class='commanddiv'>						
 								<div class='row'>
 									<div class="col-md-12">
 										<div class='btn-group paddedbtn'>
 											<button class='btn btn-primary onbarbtn debug-mode'>Debug OFF</button>
-											<button class='btn btn-success onbarbtn ckspace'>Controlla spazio</button>
-											<button class='btn btn-success onbarbtn cresh'>Crea script</button>
+											<button id="check_space" class='btn btn-success onbarbtn'>Controlla spazio</button>
+											<button id="create_script" class='btn btn-success onbarbtn'>Crea script</button>
 										</div>
 									</div>
 								</div>						
