@@ -126,7 +126,7 @@ $(document).ready(function() {
 			if(debug) $('#divdeb').html(getInfo(response.debug));
 			info = JSON.parse(response.out);
 			// console.log(info);
-			$('#homeleft').append("<br><a href='/mythweb/'>Mythtv</a>");
+			$('#homeleft').append("<br><a href='http://192.168.1.66:6544/dashboard/status'>MythTV Backend</a>");
 			$('#homeleft').append("<br>Totale video: "+info['cnt_video']);
 			apikey = info['apikey'];
 			var colors = palette('rainbow', info['genre'].length);
@@ -172,6 +172,7 @@ $(document).ready(function() {
         crossDomain: true,
 		url: "http://" + window.location.host + ":18800/info", 
 		success: function( response ) {
+            console.log(response);
 			info = JSON.parse(response);
 			console.log(info);
 			$('#homeleft').append("<br>Totale registrazioni: "+info['recordings']);
@@ -180,6 +181,28 @@ $(document).ready(function() {
 			console.log(error);
 		}
     });
+	$.ajax({ 
+		type: "GET",
+       crossDomain: true,
+		url: "http://" + window.location.host + ":18800/cut_status", 
+		success: function( response ) {
+			cut = JSON.parse(response);
+            if (cut.error) {
+                 $('#homeleft').append("<br>Job status: "+cut.message);           
+            } else {
+                fstatus = cut.out.status;
+                stats = cut.out.stats;
+                perc = (stats.video_done_seconds / fstatus.input_duration) * 100
+                $('#homeleft').append("<br>Job status: "+fstatus.title);
+                $('#homeleft').append(" ["+ fstatus.status +"/(" + fstatus.jobtype + ")]");
+                $('#homeleft').append("<br>Done:"+ formatTime(stats.video_done_seconds) + " (" + parseFloat(perc.toFixed(2)) + "%)");
+                $('#homeleft').append(" ETA:"+ stats.encoding_eta);
+            }
+		},
+		error: function( request, error ) {
+			console.log(error);
+		}
+   });
 
 	// FIXME: wait promise
 	//$.getScript("/mythmng/mythmng.js");

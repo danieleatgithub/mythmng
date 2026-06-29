@@ -101,6 +101,7 @@ if($_POST['request'] == "create_script") {
 	}
     $script = "#!/bin/bash";
     $script .= $cr . "#mount point " . $usb_path;
+	$numf = 1;
     foreach ($filenames as $file) {
         foreach ($storage as $path) {
             if (file_exists($path . "/" . $file)) {
@@ -114,9 +115,16 @@ if($_POST['request'] == "create_script") {
             array_push($videos,$video);
             $fsize = filesize($video);
             $byte_used += $fsize;
-            $cp_cmd = $cr . "cp " . $video . " " . $usb_path . "/.";
-            $cp_padded = str_pad($cp_cmd,130);
+			if (str_contains($file, ':')) {
+			// Rimuove i due punti da $file e lo appende a $usb_path
+				$dest_filename = $usb_path . '/' . str_replace(':', '', $file);
+			} else {
+				$dest_filename = $usb_path;
+			}
+			$cp_cmd = $cr .'echo -n "' . $numf . '/' . count($filenames) .' copy ' . $file . ' ...";cp ' . $video . ' ' . $dest_filename . '/.;echo "done"';
+            $cp_padded = str_pad($cp_cmd,200);
             $script .=  $cp_padded . " #" . $titles[$file] . " (" . human_filesize($fsize) . ")";
+			$numf = $numf + 1;
         }        
     } 
 
